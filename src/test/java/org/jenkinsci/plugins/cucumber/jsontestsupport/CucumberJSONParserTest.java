@@ -36,6 +36,25 @@ import org.mockito.Mockito;
 
 public class CucumberJSONParserTest {
 
+	
+//	@Test
+//	public void testParsingCMDC() throws Exception {
+//		CucumberJSONParser parser = new CucumberJSONParser();
+//		
+//		File f = new File("C:\\Users\\nordj\\Desktop\\CMDCGlue.json");
+//		
+//		List<File> files = new ArrayList<File>();
+//		files.add(f);
+//		
+//		TaskListener mockListener = Mockito.mock(TaskListener.class);
+//		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
+//		
+//		CucumberTestResult testresult = parser.parse(files, null, mockListener);
+//
+//		Assert.assertEquals("incorrect number of features", testresult.getChildren().size(), 3);
+//	}
+	
+	
 
 	@Test
 	public void testParsing() throws Exception {
@@ -51,9 +70,12 @@ public class CucumberJSONParserTest {
 		
 		CucumberTestResult testresult = parser.parse(files, null, mockListener);
 
-		Assert.assertEquals("there should be 3 features", testresult.getChildren().size(), 3);
+		Assert.assertEquals("incorrect number of features", testresult.getChildren().size(), 3);
+		// TODO some more asserts, also parse some different files.
 	}
 
+
+	
 	private static File getResourceAsFile(String resource) throws Exception {
 		URL url = CucumberJSONParserTest.class.getResource(resource);
 		Assert.assertNotNull("Resource " + resource + " could not be found", url);

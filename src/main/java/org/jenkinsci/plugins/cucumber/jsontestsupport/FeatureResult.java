@@ -23,58 +23,59 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-
-import org.apache.commons.io.FileUtils;
-import org.jenkinsci.plugins.cucumber.jsontestsupport.utils.NullAppender;
-
-import gherkin.JSONParser;
-import gherkin.deps.com.google.gson.Gson;
-import gherkin.formatter.Formatter;
-import gherkin.formatter.JSONFormatter;
-import gherkin.formatter.Reporter;
 import gherkin.formatter.model.Feature;
 import hudson.model.AbstractBuild;
-import hudson.tasks.test.TabulatedResult;
+import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents a single Feature in Cucumber.
  * 
  * @author James Nord
  */
-public class FeatureResult extends TabulatedResult {
+public class FeatureResult extends MetaTabulatedResult {
 
-	/**
-	 * Construct a new FeatureResult with the data contained in the specified File.
-	 * 
-	 * @param jsonFile the json output from a single cucumber feature
-	 */
-	public FeatureResult(Feature feature) {
-		handleFeature(feature);
+	private static final long serialVersionUID = 995206500596875310L;
+
+	private Feature feature;
+	private String uri;
+	
+	private List<ScenarioResult> scenarioResults = new ArrayList<ScenarioResult>();
+
+	// TODO needs to be reset on loading from xStream
+	private transient CucumberTestResult parent;
+
+	FeatureResult(String uri, Feature feature) {
+		this.uri = uri;
+		this.feature = feature;
 	}
-
+	
 
 	public String getDisplayName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Cucumber Feature";
 	}
 
 
 	@Override
-	public Collection<? extends TestResult> getChildren() {
-		// TODO Auto-generated method stub
-		return null;
+	public Collection<ScenarioResult> getChildren() {
+		return scenarioResults;
+	}
+
+
+	@Override
+	public String getChildTitle() {
+		return "Cucumber Scenarios";
 	}
 
 
 	@Override
 	public boolean hasChildren() {
-		// TODO Auto-generated method stub
-		return false;
+		return !scenarioResults.isEmpty();
 	}
 
 
@@ -87,8 +88,12 @@ public class FeatureResult extends TabulatedResult {
 
 	@Override
 	public TestObject getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return parent;
+	}
+
+
+	protected void setParent(CucumberTestResult parent) {
+		this.parent = parent;
 	}
 
 
@@ -98,8 +103,33 @@ public class FeatureResult extends TabulatedResult {
 		return null;
 	}
 
-	
-	protected void handleFature(Feature feature) {
-		// do something with the feature!
+
+	@Override
+	public Collection<ScenarioResult> getFailedTests() {
+		ArrayList failedResults = new ArrayList<ScenarioResult>();
+		// TODO implement me.
+		/*
+		 * ArrayList<ScenarioResult> failures; 
+		 * for (ScenarioResult result : scenarioResults) { 
+		 *   if
+		 *     ScenarioResult... 
+		 * } 
+		 * return failedScenarioResults;
+		 */
+		return failedResults;
 	}
+	
+
+	public String getURI() {
+		return uri;
+	}
+	
+	public Feature getFeature() {
+		return feature;
+	}
+	
+	void addScenarioResult(ScenarioResult scenarioResult) {
+		scenarioResults.add(scenarioResult);
+	}
+
 }

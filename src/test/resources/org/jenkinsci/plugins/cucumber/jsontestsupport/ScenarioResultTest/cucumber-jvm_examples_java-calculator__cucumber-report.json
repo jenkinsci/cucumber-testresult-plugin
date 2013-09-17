@@ -20,7 +20,7 @@
         "steps": [
           {
             "result": {
-              "duration": 110453001,
+              "duration": 103446466,
               "status": "passed"
             },
             "name": "a calculator I just turned on",
@@ -37,7 +37,7 @@
         "after": [
           {
             "result": {
-              "duration": 38289,
+              "duration": 29210,
               "status": "passed"
             },
             "match": {
@@ -53,7 +53,7 @@
         "steps": [
           {
             "result": {
-              "duration": 2986166,
+              "duration": 2203803,
               "status": "passed"
             },
             "name": "I add 4 and 5",
@@ -81,7 +81,7 @@
           },
           {
             "result": {
-              "duration": 2630510,
+              "duration": 1826436,
               "status": "passed"
             },
             "name": "the result is 9",
@@ -108,7 +108,7 @@
         "steps": [
           {
             "result": {
-              "duration": 24079,
+              "duration": 20920,
               "status": "passed"
             },
             "name": "a calculator I just turned on",
@@ -125,7 +125,7 @@
         "after": [
           {
             "result": {
-              "duration": 8684,
+              "duration": 5526,
               "status": "passed"
             },
             "match": {
@@ -134,6 +134,12 @@
           }
         ],
         "id": "basic-arithmetic;another-addition",
+        "tags": [
+          {
+            "name": "@bar",
+            "line": 11
+          }
+        ],
         "description": "",
         "name": "Another Addition",
         "keyword": "Scenario",
@@ -141,7 +147,7 @@
         "steps": [
           {
             "result": {
-              "duration": 105788,
+              "duration": 88421,
               "status": "passed"
             },
             "name": "I add 4 and 7",
@@ -169,7 +175,7 @@
           },
           {
             "result": {
-              "duration": 50132,
+              "duration": 45789,
               "status": "passed"
             },
             "name": "the result is 11",
@@ -196,7 +202,7 @@
         "steps": [
           {
             "result": {
-              "duration": 22895,
+              "duration": 16974,
               "status": "passed"
             },
             "name": "a calculator I just turned on",
@@ -213,7 +219,7 @@
         "after": [
           {
             "result": {
-              "duration": 8289,
+              "duration": 6316,
               "status": "passed"
             },
             "match": {
@@ -235,7 +241,7 @@
         "steps": [
           {
             "result": {
-              "duration": 16778186,
+              "duration": 14805698,
               "status": "passed"
             },
             "name": "the previous entries:",
@@ -273,7 +279,7 @@
           },
           {
             "result": {
-              "duration": 44605,
+              "duration": 39079,
               "status": "passed"
             },
             "name": "I press +",
@@ -291,7 +297,7 @@
           },
           {
             "result": {
-              "duration": 84868,
+              "duration": 83288,
               "status": "passed"
             },
             "name": "I add 1 and 2",
@@ -317,7 +323,7 @@
           },
           {
             "result": {
-              "duration": 37500,
+              "duration": 30789,
               "status": "passed"
             },
             "name": "I press +",
@@ -335,7 +341,7 @@
           },
           {
             "result": {
-              "duration": 71447,
+              "duration": 43026,
               "status": "passed"
             },
             "name": "the result is 8",
@@ -365,7 +371,7 @@
         "steps": [
           {
             "result": {
-              "duration": 22105,
+              "duration": 16579,
               "status": "passed"
             },
             "name": "a calculator I just turned on",
@@ -382,7 +388,7 @@
         "after": [
           {
             "result": {
-              "duration": 7500,
+              "duration": 6711,
               "status": "passed"
             },
             "match": {
@@ -404,7 +410,7 @@
         "steps": [
           {
             "result": {
-              "duration": 770521,
+              "duration": 575128,
               "status": "passed"
             },
             "name": "the previous entries:",
@@ -442,7 +448,7 @@
           },
           {
             "result": {
-              "duration": 63552,
+              "duration": 35526,
               "status": "passed"
             },
             "name": "I press +",
@@ -460,7 +466,7 @@
           },
           {
             "result": {
-              "duration": 116447,
+              "duration": 68684,
               "status": "passed"
             },
             "name": "I add 2 and 3",
@@ -486,7 +492,7 @@
           },
           {
             "result": {
-              "duration": 41842,
+              "duration": 30000,
               "status": "passed"
             },
             "name": "I press +",
@@ -504,7 +510,7 @@
           },
           {
             "result": {
-              "duration": 77762,
+              "duration": 44605,
               "status": "passed"
             },
             "name": "the result is 10",
@@ -534,7 +540,7 @@
         "steps": [
           {
             "result": {
-              "duration": 27237,
+              "duration": 16973,
               "status": "passed"
             },
             "name": "a calculator I just turned on",
@@ -551,7 +557,7 @@
         "after": [
           {
             "result": {
-              "duration": 6315,
+              "duration": 5527,
               "status": "passed"
             },
             "match": {
@@ -573,7 +579,7 @@
         "steps": [
           {
             "result": {
-              "duration": 729864,
+              "duration": 519075,
               "status": "passed"
             },
             "name": "the previous entries:",
@@ -611,7 +617,7 @@
           },
           {
             "result": {
-              "duration": 57631,
+              "duration": 39474,
               "status": "passed"
             },
             "name": "I press +",
@@ -629,7 +635,7 @@
           },
           {
             "result": {
-              "duration": 129473,
+              "duration": 62763,
               "status": "passed"
             },
             "name": "I add 10 and 20",
@@ -655,7 +661,7 @@
           },
           {
             "result": {
-              "duration": 38289,
+              "duration": 27236,
               "status": "passed"
             },
             "name": "I press +",
@@ -673,7 +679,7 @@
           },
           {
             "result": {
-              "duration": 56053,
+              "duration": 36315,
               "status": "passed"
             },
             "name": "the result is 35",
@@ -703,7 +709,7 @@
         "steps": [
           {
             "result": {
-              "duration": 24473,
+              "duration": 16974,
               "status": "passed"
             },
             "name": "a calculator I just turned on",
@@ -720,7 +726,7 @@
         "after": [
           {
             "result": {
-              "duration": 11052,
+              "duration": 5921,
               "status": "passed"
             },
             "match": {
@@ -742,7 +748,7 @@
         "steps": [
           {
             "result": {
-              "duration": 666707,
+              "duration": 421576,
               "status": "passed"
             },
             "name": "the previous entries:",
@@ -780,7 +786,7 @@
           },
           {
             "result": {
-              "duration": 50526,
+              "duration": 26842,
               "status": "passed"
             },
             "name": "I press +",
@@ -798,7 +804,7 @@
           },
           {
             "result": {
-              "duration": 104604,
+              "duration": 62368,
               "status": "passed"
             },
             "name": "I add 20 and 30",
@@ -824,7 +830,7 @@
           },
           {
             "result": {
-              "duration": 40658,
+              "duration": 26447,
               "status": "passed"
             },
             "name": "I press +",
@@ -842,7 +848,7 @@
           },
           {
             "result": {
-              "duration": 49737,
+              "duration": 33947,
               "status": "passed"
             },
             "name": "the result is 55",
@@ -878,7 +884,7 @@
         "after": [
           {
             "result": {
-              "duration": 8684,
+              "duration": 10658,
               "status": "passed"
             },
             "match": {
@@ -890,7 +896,7 @@
         "before": [
           {
             "result": {
-              "duration": 717232,
+              "duration": 536444,
               "status": "passed"
             },
             "match": {
@@ -905,7 +911,7 @@
         "steps": [
           {
             "result": {
-              "duration": 500918,
+              "duration": 328814,
               "status": "passed"
             },
             "name": "today is 2011-01-20",
@@ -923,7 +929,7 @@
           },
           {
             "result": {
-              "duration": 430655,
+              "duration": 177236,
               "status": "passed"
             },
             "name": "I ask if Jan 19, 2011 is in the past",
@@ -941,7 +947,7 @@
           },
           {
             "result": {
-              "duration": 59999,
+              "duration": 36315,
               "status": "passed"
             },
             "name": "the result should be yes",
@@ -974,7 +980,7 @@
         "after": [
           {
             "result": {
-              "duration": 10658,
+              "duration": 11447,
               "status": "passed"
             },
             "match": {
@@ -986,7 +992,7 @@
         "before": [
           {
             "result": {
-              "duration": 111315,
+              "duration": 63158,
               "status": "passed"
             },
             "match": {
@@ -1001,7 +1007,7 @@
         "steps": [
           {
             "result": {
-              "duration": 6243908,
+              "duration": 5308388,
               "status": "passed"
             },
             "name": "the following groceries:",
@@ -1043,7 +1049,7 @@
           },
           {
             "result": {
-              "duration": 86842,
+              "duration": 81710,
               "status": "passed"
             },
             "name": "I pay 25",
@@ -1061,7 +1067,7 @@
           },
           {
             "result": {
-              "duration": 103420,
+              "duration": 113289,
               "status": "passed"
             },
             "name": "my change should be 4",

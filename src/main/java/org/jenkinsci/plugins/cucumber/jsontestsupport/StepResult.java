@@ -23,6 +23,9 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import gherkin.formatter.model.Match;
+import gherkin.formatter.model.Result;
+import gherkin.formatter.model.Step;
 import hudson.model.AbstractBuild;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -34,9 +37,20 @@ import hudson.tasks.test.TestResult;
  */
 public class StepResult extends TestResult {
 
+	private Step step;
+	private Match match;
+	private Result result;
+	
+	private transient ScenarioResult parent;
+	
+	StepResult(Step step, Match match, Result result) {
+		this.step = step;
+		this.match = match;
+		this.result = result;
+	}
+	
 	public String getDisplayName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Cucumber Step result";
 	}
 
 
@@ -48,11 +62,13 @@ public class StepResult extends TestResult {
 
 
 	@Override
-	public TestObject getParent() {
-		// TODO Auto-generated method stub
-		return null;
+	public ScenarioResult getParent() {
+		return parent;
 	}
 
+	protected void setParent(ScenarioResult parent) {
+		this.parent = parent;
+	}
 
 	@Override
 	public TestResult findCorrespondingResult(String id) {

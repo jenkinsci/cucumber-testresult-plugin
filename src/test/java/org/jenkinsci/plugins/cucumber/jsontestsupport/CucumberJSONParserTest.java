@@ -21,27 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.cucumber.jsontestsupport.utils;
+package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.io.IOException;
+import hudson.model.TaskListener;
 
-/**
- * An {@link Appendable} that just throws away all output.
- * 
- * @author James Nord
- */
-public class NullAppender implements Appendable {
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-	public Appendable append(CharSequence csq) throws IOException {
-		return this;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+public class CucumberJSONParserTest {
+
+
+	@Test
+	public void testParsing() throws Exception {
+		CucumberJSONParser parser = new CucumberJSONParser();
+		
+		File f = getResourceAsFile("ScenarioResultTest/cucumber-jvm_examples_java-calculator__cucumber-report.json");
+		
+		List<File> files = new ArrayList<File>();
+		files.add(f);
+		
+		TaskListener mockListener = Mockito.mock(TaskListener.class);
+		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
+		
+		CucumberTestResult testresult = parser.parse(files, null, mockListener);
+
+		Assert.assertEquals("there should be 3 features", testresult.getChildren().size(), 3);
 	}
 
-	public Appendable append(CharSequence csq, int start, int end) throws IOException {
-		return this;
+	private static File getResourceAsFile(String resource) throws Exception {
+		URL url = CucumberJSONParserTest.class.getResource(resource);
+		Assert.assertNotNull("Resource " + resource + " could not be found", url);
+		File f = new File(url.toURI());
+		return f;
 	}
-
-	public Appendable append(char c) throws IOException {
-		return this;
-	}
-
+	
 }
+
+

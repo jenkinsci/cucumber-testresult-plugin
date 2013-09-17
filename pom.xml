@@ -76,13 +76,46 @@
 			<version>2.12.1</version>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<!-- same version as Jenkins -->
+			<version>11.0.1</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.5</version>
+		</dependency>
 	</dependencies>
 
+	<build>
+			<plugins>
+					<plugin>
+							<!-- until the fix for JENKINS-18918 is available in a backported 
+									skip any apache-maven-xxx folders in classes -->
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-jar-plugin</artifactId>
+							<version>2.4</version>
+							<configuration>
+									<excludes>
+											<exclude>**/apache-maven-*/*</exclude>
+									</excludes>
+							</configuration>
+					</plugin>
+					<plugin>
+							<groupId>org.jenkins-ci.tools</groupId>
+							<artifactId>maven-hpi-plugin</artifactId>
+							<version>1.96</version>
+							<extensions>true</extensions>
+					</plugin>
+			</plugins>
+	</build>
 
 	<!-- Jenkins is no longer synced to central so we need to bootstrap -->
 	<repositories>

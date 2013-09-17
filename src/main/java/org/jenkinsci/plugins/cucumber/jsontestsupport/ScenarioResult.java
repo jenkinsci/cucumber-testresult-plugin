@@ -23,8 +23,12 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import gherkin.formatter.model.Scenario;
+import gherkin.formatter.model.Tag;
 import hudson.model.AbstractBuild;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
@@ -35,25 +39,54 @@ import hudson.tasks.test.TestResult;
  * 
  * @author James Nord
  */
-public class ScenarioResult extends TabulatedResult {
+public class ScenarioResult extends TestResult {
 
-	public String getDisplayName() {
-		// TODO Auto-generated method stub
-		return null;
+	private Scenario scenario;
+
+	private List<StepResult> steps = new ArrayList<StepResult>();
+
+	/** Possibly empty list of code executed before the Scenario. */
+	private List<BeforeAfterResult> beforeResults = new ArrayList<BeforeAfterResult>();
+	/** Possibly <code>null</code> Background executed before the Scenario. */
+	private BackgroundResult backgroundResult = null;
+	/** Possibly empty list of code executed before the Scenario. */
+	private List<BeforeAfterResult> afterResults = new ArrayList<BeforeAfterResult>();
+
+	private transient FeatureResult parent;
+
+	// true if this test was skipped
+	private boolean skipped;
+	// true if this test failed
+	private boolean failed;
+
+
+	ScenarioResult(Scenario scenario, BackgroundResult backgroundResult) {
+		this.scenario = scenario;
+		this.backgroundResult = backgroundResult;
 	}
 
 
 	@Override
-	public Collection<? extends TestResult> getChildren() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getName() {
+		return "Cucumber Scenario";
 	}
 
 
 	@Override
-	public boolean hasChildren() {
-		// TODO Auto-generated method stub
-		return false;
+	public int getFailCount() {
+		return failed ? 1 : 0;
+	}
+
+
+	@Override
+	public int getSkipCount() {
+		return skipped ? 1 : 0;
+	}
+
+
+	@Override
+	public int getPassCount() {
+		return (!failed && !skipped) ? 1 : 0;
 	}
 
 
@@ -65,9 +98,13 @@ public class ScenarioResult extends TabulatedResult {
 
 
 	@Override
-	public TestObject getParent() {
-		// TODO Auto-generated method stub
-		return null;
+	public FeatureResult getParent() {
+		return parent;
+	}
+
+
+	protected void setParent(FeatureResult parent) {
+		this.parent = parent;
 	}
 
 
@@ -77,4 +114,42 @@ public class ScenarioResult extends TabulatedResult {
 		return null;
 	}
 
+
+	public String getDisplayName() {
+		return "Cucumber Scenario";
+	}
+
+
+	public BackgroundResult getBackgroundResult() {
+		return backgroundResult;
+	}
+
+
+	public List<BeforeAfterResult> getAfterResults() {
+		return afterResults;
+	}
+
+
+	void addAfterResult(BeforeAfterResult afterResult) {
+		afterResults.add(afterResult);
+	}
+
+
+	public List<BeforeAfterResult> getBeforeResults() {
+		return beforeResults;
+	}
+
+
+	void addBeforeResult(BeforeAfterResult beforeResult) {
+		beforeResults.add(beforeResult);
+	}
+
+
+	void addStepResult(StepResult stepResult) {
+		steps.add(stepResult);
+	}
+	
+	public Scenario getScenario() {
+		return scenario;
+	}
 }

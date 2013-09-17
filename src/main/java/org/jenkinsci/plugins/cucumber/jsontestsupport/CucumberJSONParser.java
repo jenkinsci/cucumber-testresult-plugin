@@ -23,30 +23,27 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import gherkin.JSONParser;
 import hudson.AbortException;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
-import hudson.remoting.VirtualChannel;
-import hudson.tasks.test.TestResultParser;
+import hudson.tasks.test.DefaultTestResultParserImpl;
+import hudson.tasks.test.TestResult;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.FileSet;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Parser that understands Cucumbers <a href="http://cukes.info/reports.html#json">JSON</a> notation and will
  * generate {@link hudson.tasks.test.TestResult} so that Jenkins will display the results.
  */
 @Extension
-public class CucumberJSONParser extends TestResultParser {
+public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
 	private static final Logger logger = Logger.getLogger(CucumberJSONParser.class.getName());
 
@@ -60,62 +57,49 @@ public class CucumberJSONParser extends TestResultParser {
 		return "Cucumber JSON parser";
 	}
 
-
+   /**
+    * This method is executed on the slave that has the report files to parse test reports and builds {@link TestResult}.
+    *
+    * @param reportFiles
+    *      List of files to be parsed. Never be empty nor null.
+    * @param launcher
+    *      Can be used to fork processes on the machine where the build is running. Never null.
+    * @param listener
+    *      Use this to report progress and other problems. Never null.
+    *
+    * @throws InterruptedException
+    *      If the user cancels the build, it will be received as a thread interruption. Do not catch
+    *      it, and instead just forward that through the call stack.
+    * @throws IOException
+    *      If you don't care about handling exceptions gracefully, you can just throw IOException
+    *      and let the default exception handling in Hudson takes care of it.
+    * @throws AbortException
+    *      If you encounter an error that you handled gracefully, throw this exception and Hudson
+    *      will not show a stack trace.
+    */
 	@Override
-	public TestResult parse(String testResultLocations,
-	                        AbstractBuild build,
-	                        Launcher launcher,
-	                        TaskListener listener) throws InterruptedException, IOException {
-		logger.log(Level.FINE, "parse({}, {}#{}, launcher, listener)", new Object[] {
-		                                                                             testResultLocations,
-		                                                                             build.getProject()
-		                                                                                  .getFullName(),
-		                                                                             build.getNumber()});
-		// used so we don't parse files that where not modified during this build
-		// (ie the test result is left over from a previous run)
-		final long buildTime = build.getTimestamp().getTimeInMillis();
-		final long timeOnMaster = System.currentTimeMillis();
-
-		FilePath workspace = build.getWorkspace();
-		if (workspace == null) {
-			throw new AbortException("No workspace for build ( + " + build.getProject().getFullName() + '#'
-			                         + build.getNumber() + ")");
-		}
-		return workspace.act(new ParseResultCallable(testResultLocations, buildTime, timeOnMaster));
-	}
-
-
-
-
-	private static final class ParseResultCallable implements FilePath.FileCallable<TestResult> {
-
-		private final String testResults;
-		private final long buildTime;
-		private final long timeOnMaster;
-
-
-		private ParseResultCallable(String testResults, long buildTime, long timeOnMaster) {
-			this.testResults = testResults;
-			this.buildTime = buildTime;
-			this.timeOnMaster = timeOnMaster;
-		}
-
-
-		public TestResult invoke(File ws, VirtualChannel channel) throws IOException {
-			final long timeOnSlave = System.currentTimeMillis();
-
-			FileSet fs = Util.createFileSet(ws, testResults);
-			DirectoryScanner ds = fs.getDirectoryScanner();
-
-			String[] files = ds.getIncludedFiles();
-			if (files.length == 0) {
-				// no test result. Most likely a configuration
-				// error or fatal problem
-				throw new AbortException("No JSON files found");
+   protected CucumberTestResult parse(List<File> reportFiles, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+		
+		CucumberTestResult result = new CucumberTestResult();
+		GherkinCallback callback = new GherkinCallback(result);
+		listener.getLogger().println("Parsing cucumber results.");
+		JSONParser jsonParser = new JSONParser(callback, callback);
+		
+		try {
+			for (File f : reportFiles) {
+				String s = FileUtils.readFileToString(f);
+				jsonParser.parse(s);	
 			}
-
-			TestResult result = new TestResult(buildTime + (timeOnSlave - timeOnMaster), ds);
-			return result;
 		}
+		catch (CucumberModelException ccm) {
+			throw new IOException("Failed to parse Cucumber JSON", ccm);
+		}
+		finally {
+			// even though this is a noop prevent an eclipse warning.
+			callback.close();
+		}
+		result.tally();
+		return result;
 	}
+
 }

@@ -28,10 +28,15 @@ import hudson.model.AbstractBuild;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.export.Exported;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -43,17 +48,35 @@ import com.google.common.collect.SetMultimap;
  */
 public class CucumberTestResult extends MetaTabulatedResult {
 
+	private static final long serialVersionUID = 3499017799686036745L;
+
 	private List<FeatureResult> featureResults = new ArrayList<FeatureResult>();
 
-	private List<ScenarioResult> failedScenarioResults = new ArrayList<ScenarioResult>();
+	/**
+	 *  Map of features keyed by feature name.
+	 *  Recomputed by a call to {@link CucumberTestResult#tally()}
+	 */
+	private transient Map<String,FeatureResult> featuresByName = new TreeMap<String, FeatureResult>();
+	
+	/** 
+	 * List of all failed ScenarioResults.
+	 * Recomputed by a call to {@link CucumberTestResult#tally()}
+	 */
+	private transient List<ScenarioResult> failedScenarioResults = new ArrayList<ScenarioResult>();
 
-	/** map of Tags to Scenarios. */
-	private SetMultimap<String, ScenarioResult> tagMap =  HashMultimap.create();
+	/** 
+	 * map of Tags to Scenarios. 
+	 * recomputed by a call to {@link CucumberTestResult#tally()}
+	 */
+	private transient SetMultimap<String, ScenarioResult> tagMap =  HashMultimap.create();
 
-	private int passCount;
-	private int failCount;
-	private int skipCount;
-	private float duration;
+	private transient AbstractBuild<?, ?> owner;
+	
+	/* Recomputed by a call to {@link CucumberTestResult#tally()} */
+	private transient int passCount;
+	private transient int failCount;
+	private transient int skipCount;
+	private transient float duration;
 
 
 	public CucumberTestResult() {
@@ -67,11 +90,11 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	 */
 	void addFeatureResult(FeatureResult result) {
 		featureResults.add(result);
+		result.setParent(this);
 		passCount += result.getPassCount();
 		failCount += result.getFailCount();
 		skipCount += result.getSkipCount();
 		duration += result.getDuration();
-		failedScenarioResults.addAll(result.getFailedTests());
 	}
 
 
@@ -81,11 +104,19 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	}
 
 
+	public String getChildTitle() {
+		return "Feature Name";
+	}
+   
 	@Override
 	public Collection<FeatureResult> getChildren() {
 		return featureResults;
 	}
 
+	@Exported(inline=true, visibility=9)
+	public Collection<FeatureResult> getFeatures() {
+		return featureResults;
+	}
 
 	@Override
 	public boolean hasChildren() {
@@ -98,14 +129,20 @@ public class CucumberTestResult extends MetaTabulatedResult {
 		return failedScenarioResults;
 	}
 
-
+	
 	@Override
 	public AbstractBuild<?, ?> getOwner() {
-		// TODO Auto-generated method stub
-		return null;
+		return owner;
 	}
 
+	void setOwner(AbstractBuild<?, ?> owner) {
+		this.owner = owner;
+		for (FeatureResult fr : featureResults) {
+			fr.setOwner(owner);
+		}
+	}
 
+	
 	@Override
 	public TestObject getParent() {
 		return null;
@@ -143,21 +180,38 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	}
 
 
-	//@Override  - this is an interface method
+	// @Override - this is an interface method
 	public String getDisplayName() {
-		return "Cucumber Test Results";
+		return "Test Results";
 	}
 	
 
 	@Override
 	public void tally() {
-		failedScenarioResults.clear();
-		tagMap.clear();
+		if (failedScenarioResults == null) {
+			failedScenarioResults = new ArrayList<ScenarioResult>();
+		}
+		else {
+			failedScenarioResults.clear();
+		}
+		if (tagMap == null) {
+			tagMap =  HashMultimap.create();
+		}
+		else {
+			tagMap.clear();
+		}
 		
 		passCount = 0;
 		failCount = 0;
 		skipCount = 0;
 		duration = 0.0f;
+		
+		if (featuresByName == null) {
+			featuresByName = new TreeMap<String, FeatureResult>();
+		}
+		else {
+			featuresByName.clear();
+		}
 		
 		for (FeatureResult fr : featureResults) {
 			fr.tally();
@@ -166,6 +220,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 			skipCount += fr.getSkipCount();
 			duration += fr.getDuration();
 			failedScenarioResults.addAll(fr.getFailedTests());
+			featuresByName.put(fr.getFeature().getName(), fr);
 			for (ScenarioResult scenarioResult : fr.getChildren()) {
 				for (Tag tag : scenarioResult.getScenario().getTags()) {
 					tagMap.put(tag.getName(), scenarioResult);
@@ -173,5 +228,23 @@ public class CucumberTestResult extends MetaTabulatedResult {
 			}
 		}
 	}
-	
+
+	SetMultimap<String,ScenarioResult> getTagMap() {
+		return tagMap;
+	}
+
+	@Override
+	public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
+		if (token.equals(getId())) {
+			return this;
+		}
+		FeatureResult result = featuresByName.get(token);
+		if (result != null) {
+			return result;
+		}
+		else {
+			return super.getDynamic(token, req, rsp);
+		}
+	}
+
 }

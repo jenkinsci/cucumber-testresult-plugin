@@ -27,6 +27,7 @@ import gherkin.JSONParser;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.tasks.test.DefaultTestResultParserImpl;
 import hudson.tasks.test.TestResult;
@@ -82,13 +83,19 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 		
 		CucumberTestResult result = new CucumberTestResult();
 		GherkinCallback callback = new GherkinCallback(result);
-		listener.getLogger().println("Parsing cucumber results.");
+		listener.getLogger().println("[Cucumber Tests] Parsing results.");
 		JSONParser jsonParser = new JSONParser(callback, callback);
 		
 		try {
 			for (File f : reportFiles) {
-				String s = FileUtils.readFileToString(f);
-				jsonParser.parse(s);	
+				String s = FileUtils.readFileToString(f, "UTF-8");
+				// if no scenarios where executed for a feature then a json file may still exist.
+				if (s.isEmpty()) {
+					listener.getLogger().println("[Cucumber Tests] ignoring empty file (" + f.getName() + ")");
+				}
+				else {listener.getLogger().println("[Cucumber Tests] parsing " + f.getName());
+					jsonParser.parse(s);
+				}
 			}
 		}
 		catch (CucumberModelException ccm) {
@@ -102,4 +109,16 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 		return result;
 	}
 
+
+	@Override
+	public CucumberTestResult parse(final String testResultLocations,
+	                        final AbstractBuild build,
+	                        final Launcher launcher,
+	                        final TaskListener listener) throws InterruptedException, IOException {
+		// overridden so we tally and set the owner on the master.  for some reason this worked on a smaller setup but not on a larger setup?
+		CucumberTestResult result = (CucumberTestResult) super.parse(testResultLocations, build, launcher, listener);
+		result.tally();
+		result.setOwner(build);
+		return result;
+	}
 }

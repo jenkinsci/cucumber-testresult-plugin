@@ -23,23 +23,40 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import gherkin.formatter.Argument;
+import gherkin.formatter.model.Background;
+import gherkin.formatter.model.Comment;
+import gherkin.formatter.model.DataTableRow;
+import gherkin.formatter.model.DescribedStatement;
+import gherkin.formatter.model.Match;
+import gherkin.formatter.model.Result;
+import gherkin.formatter.model.Scenario;
+import gherkin.formatter.model.Step;
+import gherkin.formatter.model.Tag;
+import gherkin.formatter.model.TagStatement;
+import hudson.model.AbstractBuild;
+import hudson.tasks.junit.CaseResult.Status;
+import hudson.tasks.test.TestResult;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
-import gherkin.formatter.model.Scenario;
-import gherkin.formatter.model.Tag;
-import hudson.model.AbstractBuild;
-import hudson.tasks.test.TabulatedResult;
-import hudson.tasks.test.TestObject;
-import hudson.tasks.test.TestResult;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * Represents a Scenario belonging to a Feature from Cucumber.
  * 
  * @author James Nord
  */
+@ExportedBean
 public class ScenarioResult extends TestResult {
+
+	private static final long serialVersionUID = 6813769160332278223L;
+
+	private static final Logger LOGGER = Logger.getLogger(ScenarioResult.class.getName());
 
 	private Scenario scenario;
 
@@ -52,48 +69,79 @@ public class ScenarioResult extends TestResult {
 	/** Possibly empty list of code executed before the Scenario. */
 	private List<BeforeAfterResult> afterResults = new ArrayList<BeforeAfterResult>();
 
-	private transient FeatureResult parent;
+	private FeatureResult parent;
+	
+	private transient AbstractBuild<?, ?> owner;
 
-	// true if this test was skipped
-	private boolean skipped;
 	// true if this test failed
-	private boolean failed;
+	private transient boolean failed;
+	private transient float duration;
 
-
+   /**
+    * This test has been failing since this build number (not id.)
+    *
+    * If {@link #isPassed() passing}, this field is left unused to 0.
+    */
+   private int failedSince;
+   
+	
 	ScenarioResult(Scenario scenario, BackgroundResult backgroundResult) {
 		this.scenario = scenario;
 		this.backgroundResult = backgroundResult;
 	}
 
-
 	@Override
+	@Exported(visibility=9)
 	public String getName() {
-		return "Cucumber Scenario";
+		return scenario.getName();
 	}
 
 
+	/*
+	 * Whilst a ScenarioResult contains a TestResult we do not count those individually. That would be akin to
+	 * reporting each JUnit Assert as a test.
+	 */
+
 	@Override
 	public int getFailCount() {
-		return failed ? 1 : 0;
+		return (failed ? 1 : 0);
 	}
 
 
 	@Override
 	public int getSkipCount() {
-		return skipped ? 1 : 0;
+		return 0;
 	}
 
 
 	@Override
+	@Exported(visibility=9)
 	public int getPassCount() {
-		return (!failed && !skipped) ? 1 : 0;
+		return (failed ? 0 : 1);
 	}
 
 
+	
 	@Override
 	public AbstractBuild<?, ?> getOwner() {
-		// TODO Auto-generated method stub
-		return null;
+		return owner;
+	}
+
+
+	public void setOwner(AbstractBuild<?, ?> owner) {
+		this.owner = owner;
+		for (BeforeAfterResult bar : beforeResults) {
+			bar.setOwner(owner);
+		}
+		for (BeforeAfterResult bar : afterResults) {
+			bar.setOwner(owner);
+		}
+		for (StepResult sr : steps) {
+			sr.setOwner(owner);
+		}
+		if (backgroundResult != null) {
+			backgroundResult.setOwner(owner);
+		}
 	}
 
 
@@ -116,7 +164,7 @@ public class ScenarioResult extends TestResult {
 
 
 	public String getDisplayName() {
-		return "Cucumber Scenario";
+		return getName();
 	}
 
 
@@ -148,8 +196,115 @@ public class ScenarioResult extends TestResult {
 	void addStepResult(StepResult stepResult) {
 		steps.add(stepResult);
 	}
+
+	public Collection<StepResult> getStepResults() {
+		return steps;
+	}
 	
 	public Scenario getScenario() {
 		return scenario;
+	}
+
+	@Override
+	@Exported(visibility=9)
+	public float getDuration() {
+	   return duration;
+	}
+	
+
+	@Exported(name = "status", visibility = 9)
+	// stapler strips the trailing 's'
+	public Status getStatus() {
+		if (getSkipCount() > 0) {
+			// cucumber doesn't report skipped scenarios
+			return Status.SKIPPED;
+		}
+		ScenarioResult psr = (ScenarioResult) getPreviousResult();
+		if (psr == null) {
+			return isPassed() ? Status.PASSED : Status.FAILED;
+		}
+		if (psr.isPassed()) {
+			return isPassed() ? Status.PASSED : Status.REGRESSION;
+		}
+		else {
+			return isPassed() ? Status.FIXED : Status.FAILED;
+		}
+	}
+
+
+	/**
+	 * If this test failed, then return the build number when this test started failing.
+	 */
+	@Override
+	@Exported(visibility = 9)
+	public int getFailedSince() {
+		// If we haven't calculated failedSince yet, and we should,
+		// do it now.
+		if (failedSince == 0 && getFailCount() == 1) {
+			ScenarioResult prev = (ScenarioResult) getPreviousResult();
+			if (prev != null && !prev.isPassed())
+				this.failedSince = prev.failedSince;
+			else if (getOwner() != null) {
+				this.failedSince = getOwner().getNumber();
+			}
+			else {
+				LOGGER.warning("Can not calculate failed since. we have a previous result but no owner.");
+				// failedSince will be 0, which isn't correct.
+			}
+		}
+		return failedSince;
+	}
+
+
+	/**
+	 * Gets the number of consecutive builds (including this) that this test case has been failing.
+	 */
+	@Exported(visibility = 9)
+	public int getAge() {
+		if (isPassed())
+			return 0;
+		else if (getOwner() != null) {
+			return getOwner().getNumber() - getFailedSince() + 1;
+		}
+		else {
+			LOGGER.fine("Trying to get age of a CaseResult without an owner");
+			return 0;
+		}
+	}
+
+
+	@Override
+	public void tally() {
+		failed = false;
+		duration = 0.0f;
+		for (StepResult sr : steps) {
+			duration += sr.getDuration();
+			if (sr.getFailCount() != 0) {
+				failed = true;
+			}
+		}
+		
+		if (backgroundResult != null) {
+			duration += backgroundResult.getDuration();
+			if (backgroundResult.getFailCount() != 0) {
+				failed = true;
+			}
+		}		
+		for (BeforeAfterResult bar : beforeResults) {
+			duration += bar.getDuration();
+			if (bar.getFailCount() != 0) {
+				failed = true;
+			}
+		}
+		for (BeforeAfterResult bar : afterResults) {
+			duration += bar.getDuration();
+			if (bar.getFailCount() != 0) {
+				failed = true;
+			}
+		}
+	}
+	
+	public String getSource() {
+		return ScenarioToHTML.getHTML(this); 
 	}
 }

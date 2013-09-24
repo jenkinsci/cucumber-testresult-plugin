@@ -35,35 +35,42 @@ import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
 /**
- * Represents a Before or After belonging to a Scenario.
- * Although this is a test Object as it is a background it is not intended for individual Display.
+ * Represents a Before or After belonging to a Scenario. Although this is a test Object as it is a background
+ * it is not intended for individual Display.
+ * 
  * @author James Nord
  */
 public class BeforeAfterResult extends TestResult {
-	
+
 	private Match macth;
-	private Result result; 
-	
-	
+	private Result result;
+
+	private transient AbstractBuild<?, ?> owner;
+
+
 	public BeforeAfterResult(Match match, Result result) {
 		this.macth = match;
 		this.result = result;
 	}
-	
+
+
 	@Override
 	public String getName() {
-		return "Cucumber Background"; 
+		return "Cucumber Background";
 	}
-	
+
+
 	@Override
 	public int getFailCount() {
 		return Result.FAILED.equals(result.getStatus()) ? 1 : 0;
 	}
 
+
 	@Override
 	public int getSkipCount() {
 		return Result.SKIPPED.equals(result.getStatus()) ? 1 : 0;
 	}
+
 
 	@Override
 	public int getPassCount() {
@@ -71,28 +78,50 @@ public class BeforeAfterResult extends TestResult {
 	}
 
 
+	@Override
+	public AbstractBuild<?, ?> getOwner() {
+		return owner;
+	}
+
+
+	void setOwner(AbstractBuild<?, ?> owner) {
+		this.owner = owner;
+	}
+
 
 	@Override
-   public AbstractBuild<?, ?> getOwner() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+	public TestObject getParent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 	@Override
-   public TestObject getParent() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+	public TestResult findCorrespondingResult(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-	@Override
-   public TestResult findCorrespondingResult(String id) {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
 
 	public String getDisplayName() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public float getDuration() {
+		return CucumberUtils.durationFromResult(result);
+	}
+
+
+	Match getMacth() {
+		return macth;
+	}
+
+
+	Result getResult() {
+		return result;
+	}
 
 }

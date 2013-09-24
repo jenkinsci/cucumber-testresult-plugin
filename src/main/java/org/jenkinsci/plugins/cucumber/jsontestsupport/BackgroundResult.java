@@ -34,7 +34,7 @@ import hudson.tasks.test.TestResult;
 
 /**
  * Represents a Background belonging to a Scenario.
- * Although this is a test Object as it is a background it is not inteded for individual Display.
+ * Although this is a test Object as it is a background it is not intended for individual Display.
  * @author James Nord
  */
 public class BackgroundResult extends TestResult {
@@ -42,11 +42,30 @@ public class BackgroundResult extends TestResult {
 	private Background background;
 	private ArrayList<StepResult> stepResults = new ArrayList<StepResult>(); 
 	
+	private ScenarioResult parent;
+	
+	private transient AbstractBuild<?, ?> owner;
+	
+	/* Recomputed by a call to {@link CucumberTestResult#tally()} */
+	// true if this test failed
+	private transient boolean failed;
+	private transient float duration;
 	
 	BackgroundResult(Background background) {
 		this.background = background;
 	}
+	
+	@Override
+   public AbstractBuild<?, ?> getOwner() {
+	   return owner;
+   }
 
+	void setOwner(AbstractBuild<?, ?> owner) {
+		this.owner = owner;
+		for (StepResult sr : stepResults) {
+			sr.setOwner(owner);
+		}
+	}
 	
 	@Override
 	public String getName() {
@@ -60,27 +79,30 @@ public class BackgroundResult extends TestResult {
 
 	@Override
 	public int getSkipCount() {
-		return skipped ? 1 : 0;
+		return 0;
 	}
 
 	@Override
 	public int getPassCount() {
-		return (!failed && !skipped) ? 1 : 0;
+		return failed ? 0 : 1;
 	}
 
+	
 
 
 	@Override
-   public AbstractBuild<?, ?> getOwner() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+	public ScenarioResult getParent() {
+		return parent;
+	}
+	
+	void setParent(ScenarioResult parent) {
+		this.parent = parent;
+	}
 
 	@Override
-   public TestObject getParent() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+	public float getDuration() {
+	   return duration;
+	}
 
 	@Override
    public TestResult findCorrespondingResult(String id) {
@@ -100,4 +122,22 @@ public class BackgroundResult extends TestResult {
 		stepResults.add(stepResult);
 	}
 	
+	
+	Collection<StepResult> getStepResults() {
+		return stepResults;
+	}
+	
+	@Override
+	public void tally() {
+		duration = 0.0f;
+
+		for (StepResult sr : stepResults) {
+			sr.tally();
+			if (sr.getFailCount() != 0) {
+				failed = true;
+			}
+			duration += sr.getDuration();
+		}
+	}
+
 }

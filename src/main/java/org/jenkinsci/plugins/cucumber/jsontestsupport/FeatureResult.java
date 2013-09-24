@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import gherkin.formatter.model.Feature;
 import hudson.model.AbstractBuild;
+import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -32,21 +33,43 @@ import hudson.tasks.test.TestResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * Represents a single Feature in Cucumber.
  * 
  * @author James Nord
  */
+@ExportedBean
 public class FeatureResult extends MetaTabulatedResult {
 
 	private static final long serialVersionUID = 995206500596875310L;
 
 	private Feature feature;
 	private String uri;
+	private transient AbstractBuild<?, ?> owner;
 	
 	private List<ScenarioResult> scenarioResults = new ArrayList<ScenarioResult>();
 
+	/**
+	 *  Map of scenarios keyed by scenario name.
+	 *  Recomputed by a call to {@link CucumberTestResult#tally()}
+	 */
+	private transient Map<String,ScenarioResult> scenariosByName = new TreeMap<String, ScenarioResult>();
+	
+	// XXX do we need to store these or should they be transient and recomputed on load.
+	private int passCount;
+	private int failCount;
+	private int skipCount;
+	private float duration;
+	
+	
 	// TODO needs to be reset on loading from xStream
 	private transient CucumberTestResult parent;
 
@@ -57,15 +80,24 @@ public class FeatureResult extends MetaTabulatedResult {
 	
 
 	public String getDisplayName() {
-		return "Cucumber Feature";
+		return getName();
 	}
 
-
+	@Exported(visibility=9)
+	public String getName() {
+		return feature.getName();
+	}
+	
+	
 	@Override
 	public Collection<ScenarioResult> getChildren() {
 		return scenarioResults;
 	}
 
+	@Exported(visibility=9)
+	public Collection<ScenarioResult> getScenarioResults() {
+		return scenarioResults;
+	}
 
 	@Override
 	public String getChildTitle() {
@@ -81,11 +113,16 @@ public class FeatureResult extends MetaTabulatedResult {
 
 	@Override
 	public AbstractBuild<?, ?> getOwner() {
-		// TODO Auto-generated method stub
-		return null;
+		return owner;
 	}
 
-
+	public void setOwner(AbstractBuild<?, ?> owner) {
+	   this.owner = owner;
+	   for (ScenarioResult sr : scenarioResults) {
+	   	sr.setOwner(owner);
+	   }
+   }
+	
 	@Override
 	public TestObject getParent() {
 		return parent;
@@ -106,7 +143,7 @@ public class FeatureResult extends MetaTabulatedResult {
 
 	@Override
 	public Collection<ScenarioResult> getFailedTests() {
-		ArrayList failedResults = new ArrayList<ScenarioResult>();
+		ArrayList<ScenarioResult> failedResults = new ArrayList<ScenarioResult>();
 		// TODO implement me.
 		/*
 		 * ArrayList<ScenarioResult> failures; 
@@ -130,6 +167,72 @@ public class FeatureResult extends MetaTabulatedResult {
 	
 	void addScenarioResult(ScenarioResult scenarioResult) {
 		scenarioResults.add(scenarioResult);
+		scenarioResult.setParent(this);
 	}
 
+	@Override
+	public void tally() {
+		if (scenariosByName == null) {
+			scenariosByName = new TreeMap<String, ScenarioResult>();
+		}
+		else {
+			scenariosByName.clear();
+		}
+		passCount = 0;
+		failCount = 0;
+		skipCount = 0;
+		duration = 0.0f;
+
+		
+		
+		for (ScenarioResult sr : scenarioResults) {
+			sr.tally();
+			// XXX scenarious may be duplicated!??!
+			scenariosByName.put(sr.getName(), sr);
+			passCount += sr.getPassCount();
+			failCount += sr.getFailCount();
+			skipCount += sr.getSkipCount();
+			duration += sr.getDuration();
+		}
+	}
+	
+
+	@Override
+	public int getFailCount() {
+		return failCount;
+	}
+
+
+	@Override
+	public int getPassCount() {
+		return passCount;
+	}
+
+
+	@Override
+	public float getDuration() {
+		return duration;
+	}
+
+
+	@Override
+	public int getSkipCount() {
+		// always zero?
+		return skipCount;
+	}
+
+   @Override
+	public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
+		if (token.equals(getId())) {
+			return this;
+		}
+		ScenarioResult result = scenariosByName.get(token);
+		if (result != null) {
+			return result;
+		}
+		else {
+			return super.getDynamic(token, req, rsp);
+		}
+	}
+	
 }

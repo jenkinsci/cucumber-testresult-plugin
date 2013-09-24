@@ -27,7 +27,6 @@ import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
 import gherkin.formatter.model.Step;
 import hudson.model.AbstractBuild;
-import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
 /**
@@ -40,15 +39,18 @@ public class StepResult extends TestResult {
 	private Step step;
 	private Match match;
 	private Result result;
-	
-	private transient ScenarioResult parent;
-	
+
+	private ScenarioResult parent;
+	private transient AbstractBuild<?, ?> owner;
+
+
 	StepResult(Step step, Match match, Result result) {
 		this.step = step;
 		this.match = match;
 		this.result = result;
 	}
-	
+
+
 	public String getDisplayName() {
 		return "Cucumber Step result";
 	}
@@ -56,8 +58,12 @@ public class StepResult extends TestResult {
 
 	@Override
 	public AbstractBuild<?, ?> getOwner() {
-		// TODO Auto-generated method stub
-		return null;
+		return owner;
+	}
+
+
+	void setOwner(AbstractBuild<?, ?> owner) {
+		this.owner = owner;
 	}
 
 
@@ -66,9 +72,11 @@ public class StepResult extends TestResult {
 		return parent;
 	}
 
+
 	protected void setParent(ScenarioResult parent) {
 		this.parent = parent;
 	}
+
 
 	@Override
 	public TestResult findCorrespondingResult(String id) {
@@ -76,4 +84,48 @@ public class StepResult extends TestResult {
 		return null;
 	}
 
+
+	@Override
+	public float getDuration() {
+		return CucumberUtils.durationFromResult(result);
+	}
+
+
+	/**
+	 * Gets the total number of passed tests.
+	 */
+	public int getPassCount() {
+		return Result.PASSED.equals(result.getStatus()) ? 1 : 0;
+	}
+
+
+	/**
+	 * Gets the total number of failed tests.
+	 */
+	public int getFailCount() {
+		return Result.FAILED.equals(result.getStatus()) ? 1 : 0;
+	}
+
+
+	/**
+	 * Gets the total number of skipped tests.
+	 */
+	public int getSkipCount() {
+		return Result.SKIPPED.equals(result.getStatus()) ? 1 : 0;
+	}
+
+
+	Step getStep() {
+		return step;
+	}
+
+
+	Match getMatch() {
+		return match;
+	}
+
+
+	Result getResult() {
+		return result;
+	}
 }

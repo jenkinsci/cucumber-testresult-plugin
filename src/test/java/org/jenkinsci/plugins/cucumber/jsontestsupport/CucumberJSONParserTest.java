@@ -54,7 +54,6 @@ public class CucumberJSONParserTest {
 //		Assert.assertEquals("incorrect number of features", testresult.getChildren().size(), 3);
 //	}
 	
-	
 
 	@Test
 	public void testParsing() throws Exception {

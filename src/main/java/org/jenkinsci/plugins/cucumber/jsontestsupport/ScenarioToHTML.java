@@ -85,7 +85,8 @@ public class ScenarioToHTML {
 	 * elsewhere!
 	 */
 	public String getHTML() {
-		StringBuilder sb = new StringBuilder();
+		// we will be pretty big so start of large to avoild re-allocation.
+		StringBuilder sb = new StringBuilder(20 * 1024);
 
 		sb.append("<table border=\"0\" cellpadding=\"3\" cellspacing=\"0\" bgcolor=\"#ffffff\">\n");
 		sb.append("<tbody>\n");
@@ -116,8 +117,7 @@ public class ScenarioToHTML {
 
 	private StringBuilder addBasicStatement(StringBuilder sb, TagStatement tagStatement) {
 		for (Comment comment : tagStatement.getComments()) {
-			createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT);
-			sb.append(comment.getValue());
+			addComment(sb, comment);
 		}
 		for (Tag tag : tagStatement.getTags()) {
 			createLine(sb, tag.getLine(), RESULT_TYPE.NO_RESULT);
@@ -230,12 +230,22 @@ public class ScenarioToHTML {
 
 	public StringBuilder addStepResult(StringBuilder sb, StepResult stepResult) {
 		Step step = stepResult.getStep();
+		{
+			List<Comment> comments = step.getComments();
+			if (comments != null) {
+				for (Comment c : comments) {
+					addComment(sb, c);
+				}
+			}
+		}
 		createLine(sb, step.getLine(), RESULT_TYPE.typeFromResult(stepResult.getResult()));
 		appendKeyword(sb, step.getKeyword());
 		sb.append(' ');
 		sb.append(step.getName());
 		if (step.getRows() != null) {
 			indent++;
+
+			boolean firstRow = true;
 			for (DataTableRow dtr : step.getRows()) {
 				List<Comment> comments = dtr.getComments();
 				if (comments != null) {
@@ -244,10 +254,27 @@ public class ScenarioToHTML {
 					}
 				}
 				createLine(sb, dtr.getLine(), RESULT_TYPE.NO_RESULT);
+				int colwidth = 100 / (dtr.getCells().size());
+				// these span multiple lines and divs don't wrap if the argument is too long
+				// so use a table per row with the same sizes for each column. ugly but works...
+				// having a large colspan would be nice but then we need to compute all the possibilities up
+				// front.
+				sb.append("<table width=\"80%\">");
+				sb.append("<tr>");
 				for (String cell : dtr.getCells()) {
-					sb.append(" | ").append(cell);
+					if (firstRow) {
+						sb.append("<th width=\"").append(colwidth).append("%\">");
+						sb.append(cell);
+						sb.append("</th>");
+						continue;
+					}
+					sb.append("<td width=\"").append(colwidth).append("%\">");
+					sb.append(cell);
+					sb.append("</td>");
 				}
-				sb.append(" |");
+				sb.append("</tr></table>");
+
+				firstRow = false;
 				endLine(sb);
 			}
 			indent--;

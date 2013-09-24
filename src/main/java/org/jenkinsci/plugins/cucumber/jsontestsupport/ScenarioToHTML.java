@@ -35,149 +35,187 @@ import gherkin.formatter.model.Tag;
 import gherkin.formatter.model.TagStatement;
 
 import java.util.List;
-
+import java.util.Locale;
 
 public class ScenarioToHTML {
-	
+
+	private enum RESULT_TYPE {
+
+		/** Step failed as it was not defined */
+		UNDEFINED(""),
+		/** step passed */
+		PASSED("background-color: #e6ffcc;"),
+		/** step failed */
+		FAILED("background-color: #ffeeee;"),
+		/** step skipped due to previous failure */
+		SKIPPED("background-color: #ffffcc;"),
+		/** line does not have a result */
+		NO_RESULT("");
+
+		public final String css;
+
+
+		RESULT_TYPE(String css) {
+			this.css = css;
+		}
+
+
+		public static RESULT_TYPE typeFromResult(Result r) {
+			return RESULT_TYPE.valueOf(r.getStatus().toUpperCase(Locale.UK));
+		}
+	}
+
 	private int indent = 0;
-	
+
 	private ScenarioResult scenarioResult;
-	
+
+
 	public ScenarioToHTML(ScenarioResult scenarioResult) {
 		this.scenarioResult = scenarioResult;
 	}
-	
+
+
 	public static String getHTML(ScenarioResult scenarioResult) {
 		return new ScenarioToHTML(scenarioResult).getHTML();
 	}
-	
+
+
 	/**
-	 * Builds a Gherkin file from the results of the parsing and formats it for HTML.
-	 * XXX this should be moved elsewhere!
+	 * Builds a Gherkin file from the results of the parsing and formats it for HTML. XXX this should be moved
+	 * elsewhere!
 	 */
 	public String getHTML() {
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append("<table border=\"0\" cellpadding=\"3\" cellspacing=\"0\" bgcolor=\"#ffffff\">\n");
-		sb.append("<tbody><tr>\n");
-		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\">\n");
-		sb.append("<code>");
+		sb.append("<tbody>\n");
 		// being gherkin output...
-		
+
 		addBasicStatement(sb, scenarioResult.getParent().getFeature());
 		indent++;
-		
+
 		for (BeforeAfterResult before : scenarioResult.getBeforeResults()) {
-			addBeforeAfterResult(sb, "before",  before);
+			addBeforeAfterResult(sb, "before", before);
 		}
 		addBackgroundResult(sb, scenarioResult.getBackgroundResult());
-		
+
 		addDescribedStatement(sb, scenarioResult.getScenario());
 		indent++;
-		
+
 		for (StepResult stepResult : scenarioResult.getStepResults()) {
 			addStepResult(sb, stepResult);
 		}
-		for (BeforeAfterResult after: scenarioResult.getAfterResults()) {
+		for (BeforeAfterResult after : scenarioResult.getAfterResults()) {
 			addBeforeAfterResult(sb, "after", after);
 		}
 		// end gherkin output...
-		sb.append("</code>");
-		sb.append("</td></tbody></table>");
+		sb.append("</tbody></table>");
 		return sb.toString();
 	}
 
 
 	private StringBuilder addBasicStatement(StringBuilder sb, TagStatement tagStatement) {
-		sb.append("<!-- addBasicStatement -->");
 		for (Comment comment : tagStatement.getComments()) {
-			createLine(sb, comment.getLine());
+			createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT);
 			sb.append(comment.getValue());
 		}
 		for (Tag tag : tagStatement.getTags()) {
-			createLine(sb, tag.getLine());
+			createLine(sb, tag.getLine(), RESULT_TYPE.NO_RESULT);
 			sb.append(tag.getName());
 		}
-		createLine(sb, tagStatement.getLine());
+		createLine(sb, tagStatement.getLine(), RESULT_TYPE.NO_RESULT);
 		appendKeyword(sb, tagStatement.getKeyword()).append(' ').append(tagStatement.getName());
+		endLine(sb);
 		return sb;
 	}
-	
-	private StringBuilder createLine(StringBuilder sb, Integer line) {
+
+
+	private StringBuilder createLine(StringBuilder sb, Integer line, RESULT_TYPE type) {
 		String lineStr = String.format("%03d", line);
-		return createLine(sb, lineStr);
+		return createLine(sb, lineStr, type);
 	}
-	
-	private StringBuilder createLine(StringBuilder sb, String str) {
-		sb.append("\n<tr><td><a style=\"color:#808080\" name=\"").append(str).append("\">");
+
+
+	private StringBuilder createLine(StringBuilder sb, String str, RESULT_TYPE type) {
+		sb.append("\n<tr><td valign=\"top\" align=\"right\"><a style=\"color:#808080\" name=\"").append(str).append("\">");
 		sb.append(str);
-		sb.append("</a><td>");
-		addIndent(sb);
+		sb.append("</a></td>");
+		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"").append(type.css).append("\">");
+		sb.append("<div style=\"padding-left: ").append(indent).append("em;");
+		sb.append(type.css);
+		sb.append("\">");
 		return sb;
 	}
-	
+
+
+	private StringBuilder endLine(StringBuilder sb) {
+		return sb.append("</div></td>");
+	}
+
+
 	public StringBuilder addComment(StringBuilder sb, Comment comment) {
-		createLine(sb, comment.getLine());
+		createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT);
 		sb.append(comment.getValue());
+		endLine(sb);
 		return sb;
 	}
-	
+
+
 	public StringBuilder addDescribedStatement(StringBuilder sb, DescribedStatement ds) {
 		for (Comment comment : ds.getComments()) {
 			addComment(sb, comment);
 		}
-		createLine(sb, ds.getLine());
+		createLine(sb, ds.getLine(), RESULT_TYPE.NO_RESULT);
 		appendKeyword(sb, ds.getKeyword());
 		sb.append(' ');
 		sb.append(ds.getName());
+		endLine(sb);
 		return sb;
 	}
-	
+
+
 	public StringBuilder appendKeyword(StringBuilder sb, String keyword) {
 		sb.append("<span style=\"font-weight: bold\">").append(keyword).append("</span>");
-		return sb;	
+		return sb;
 	}
-	
-	public StringBuilder addBeforeAfterResult(StringBuilder sb, String beforeOrAfter, BeforeAfterResult beforeAfter) {
-		sb.append("<!-- addBeforeAfterResult -->");
+
+
+	public StringBuilder addBeforeAfterResult(StringBuilder sb,
+	                                          String beforeOrAfter,
+	                                          BeforeAfterResult beforeAfter) {
 		Match m = beforeAfter.getMacth();
 		Result r = beforeAfter.getResult();
-		createLine(sb, beforeOrAfter);
+		createLine(sb, beforeOrAfter, RESULT_TYPE.typeFromResult(r));
 		sb.append(m.getLocation()).append(' ');
 		addFailure(sb, r);
 		// XXX add argument formatting
 		List<Argument> args = m.getArguments();
+		endLine(sb);
 		return sb;
 	}
-	
+
+
 	public StringBuilder addFailure(StringBuilder sb, Result result) {
 		if (Result.FAILED.equals(result.getStatus())) {
-			createLine(sb, "Failure");
-			sb.append("<div style=\"background-color: #ffcccc\">");
+			createLine(sb, "Failure", RESULT_TYPE.FAILED);
 			String[] stack = result.getErrorMessage().split("\n");
-			
+
 			sb.append(stack[0]).append("<br>");
 			for (int i = 1; i < stack.length; i++) {
-				addIndent(sb);
 				sb.append(stack[i].replaceAll("\t", "&nbsp;&nbsp;"));
 				sb.append("<br>");
 			}
-			sb.append("</div>");
 			// Error is always null (only non null when invoked direct as part of the test).
 			/*
-			Throwable t = result.getError();
-			if (t != null) {
-				StackTraceElement stack[] = t.getStackTrace();
-				for (StackTraceElement ste : stack) {
-					sb.append(ste.toString()).append("<br>");
-				}
-			}
-			*/
+			 * Throwable t = result.getError(); if (t != null) { StackTraceElement stack[] = t.getStackTrace();
+			 * for (StackTraceElement ste : stack) { sb.append(ste.toString()).append("<br>"); } }
+			 */
 		}
+		endLine(sb);
 		return sb;
 	}
-	
-	
+
+
 	public StringBuilder addBackgroundResult(StringBuilder sb, BackgroundResult backgroundResult) {
 		if (backgroundResult != null) {
 			Background background = backgroundResult.getBackground();
@@ -189,10 +227,10 @@ public class ScenarioToHTML {
 		return sb;
 	}
 
-	
+
 	public StringBuilder addStepResult(StringBuilder sb, StepResult stepResult) {
 		Step step = stepResult.getStep();
-		createLine(sb, step.getLine());
+		createLine(sb, step.getLine(), RESULT_TYPE.typeFromResult(stepResult.getResult()));
 		appendKeyword(sb, step.getKeyword());
 		sb.append(' ');
 		sb.append(step.getName());
@@ -205,28 +243,19 @@ public class ScenarioToHTML {
 						addComment(sb, comment);
 					}
 				}
-				createLine(sb, dtr.getLine());
+				createLine(sb, dtr.getLine(), RESULT_TYPE.NO_RESULT);
 				for (String cell : dtr.getCells()) {
 					sb.append(" | ").append(cell);
 				}
 				sb.append(" |");
+				endLine(sb);
 			}
 			indent--;
 		}
+		endLine(sb);
 		// TODO add support for table rows...
 		addFailure(sb, stepResult.getResult());
 		return sb;
-   }
-	
-	public StringBuilder addIndent(StringBuilder sb) {
-		return addIndent(sb, indent);
 	}
-	
-	public StringBuilder addIndent(StringBuilder sb, int level) {
-		for (int i=0; i < level; i++) {
-			sb.append("&nbsp;&nbsp;&nbsp;&nbsp");
-		}
-		return sb;
-	}
-	
+
 }

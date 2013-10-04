@@ -56,7 +56,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	 *  Map of features keyed by feature name.
 	 *  Recomputed by a call to {@link CucumberTestResult#tally()}
 	 */
-	private transient Map<String,FeatureResult> featuresByName = new TreeMap<String, FeatureResult>();
+	private transient Map<String,FeatureResult> featuresById = new TreeMap<String, FeatureResult>();
 	
 	/** 
 	 * List of all failed ScenarioResults.
@@ -206,11 +206,11 @@ public class CucumberTestResult extends MetaTabulatedResult {
 		skipCount = 0;
 		duration = 0.0f;
 		
-		if (featuresByName == null) {
-			featuresByName = new TreeMap<String, FeatureResult>();
+		if (featuresById == null) {
+			featuresById = new TreeMap<String, FeatureResult>();
 		}
 		else {
-			featuresByName.clear();
+			featuresById.clear();
 		}
 		
 		for (FeatureResult fr : featureResults) {
@@ -220,7 +220,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 			skipCount += fr.getSkipCount();
 			duration += fr.getDuration();
 			failedScenarioResults.addAll(fr.getFailedTests());
-			featuresByName.put(fr.getFeature().getName(), fr);
+			featuresById.put(fr.getSafeName(), fr);
 			for (ScenarioResult scenarioResult : fr.getChildren()) {
 				for (Tag tag : scenarioResult.getScenario().getTags()) {
 					tagMap.put(tag.getName(), scenarioResult);
@@ -235,10 +235,11 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	@Override
 	public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
+		// TODO Tag support!
 		if (token.equals(getId())) {
 			return this;
 		}
-		FeatureResult result = featuresByName.get(token);
+		FeatureResult result = featuresById.get(token);
 		if (result != null) {
 			return result;
 		}

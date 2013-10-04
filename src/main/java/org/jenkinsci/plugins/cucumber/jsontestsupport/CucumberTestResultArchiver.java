@@ -167,7 +167,6 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public String getDisplayName() {
-			System.out.println("erywer8304759834759837459394875");
 			return "Cucumber result archiver";
 		}
 
@@ -196,7 +195,6 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-			System.out.println("!*&£&$*(£&($&£$&*£&$(*£&$(*£&$£$&(£&$£&");
 			return true;
 		}
 	}

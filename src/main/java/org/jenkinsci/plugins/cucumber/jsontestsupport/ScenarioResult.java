@@ -23,17 +23,7 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import gherkin.formatter.Argument;
-import gherkin.formatter.model.Background;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.DataTableRow;
-import gherkin.formatter.model.DescribedStatement;
-import gherkin.formatter.model.Match;
-import gherkin.formatter.model.Result;
 import gherkin.formatter.model.Scenario;
-import gherkin.formatter.model.Step;
-import gherkin.formatter.model.Tag;
-import gherkin.formatter.model.TagStatement;
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.CaseResult.Status;
 import hudson.tasks.test.TestResult;
@@ -72,6 +62,7 @@ public class ScenarioResult extends TestResult {
 	private FeatureResult parent;
 	
 	private transient AbstractBuild<?, ?> owner;
+	private transient String safeName;
 
 	// true if this test failed
 	private transient boolean failed;
@@ -95,8 +86,7 @@ public class ScenarioResult extends TestResult {
 	public String getName() {
 		return scenario.getName();
 	}
-
-
+	
 	/*
 	 * Whilst a ScenarioResult contains a TestResult we do not count those individually. That would be akin to
 	 * reporting each JUnit Assert as a test.
@@ -107,7 +97,21 @@ public class ScenarioResult extends TestResult {
 		return (failed ? 1 : 0);
 	}
 
-
+	@Override
+	public synchronized String getSafeName() {
+		if (safeName != null) {
+			return safeName;
+		}
+		String name = safe(scenario.getId());
+		String parentName = parent.getSafeName() + ';';
+		
+		if (name.startsWith(parentName)) {
+			name = name.replace(parentName, "");
+		}
+		safeName = uniquifyName(parent.getChildren(), name);
+		return safeName;
+	}
+	
 	@Override
 	public int getSkipCount() {
 		return 0;
@@ -208,7 +212,7 @@ public class ScenarioResult extends TestResult {
 	@Override
 	@Exported(visibility=9)
 	public float getDuration() {
-	   return duration;
+		return duration;
 	}
 	
 
@@ -255,7 +259,6 @@ public class ScenarioResult extends TestResult {
 		return failedSince;
 	}
 
-
 	/**
 	 * Gets the number of consecutive builds (including this) that this test case has been failing.
 	 */
@@ -267,7 +270,7 @@ public class ScenarioResult extends TestResult {
 			return getOwner().getNumber() - getFailedSince() + 1;
 		}
 		else {
-			LOGGER.fine("Trying to get age of a CaseResult without an owner");
+			LOGGER.fine("Trying to get age of a ScenarioResult without an owner");
 			return 0;
 		}
 	}

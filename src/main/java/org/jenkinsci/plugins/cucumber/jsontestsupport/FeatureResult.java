@@ -25,7 +25,6 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import gherkin.formatter.model.Feature;
 import hudson.model.AbstractBuild;
-import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -54,6 +53,7 @@ public class FeatureResult extends MetaTabulatedResult {
 	private Feature feature;
 	private String uri;
 	private transient AbstractBuild<?, ?> owner;
+	private transient String safeName;
 	
 	private List<ScenarioResult> scenarioResults = new ArrayList<ScenarioResult>();
 
@@ -61,7 +61,7 @@ public class FeatureResult extends MetaTabulatedResult {
 	 *  Map of scenarios keyed by scenario name.
 	 *  Recomputed by a call to {@link CucumberTestResult#tally()}
 	 */
-	private transient Map<String,ScenarioResult> scenariosByName = new TreeMap<String, ScenarioResult>();
+	private transient Map<String,ScenarioResult> scenariosByID = new TreeMap<String, ScenarioResult>();
 	
 	// XXX do we need to store these or should they be transient and recomputed on load.
 	private int passCount;
@@ -70,8 +70,8 @@ public class FeatureResult extends MetaTabulatedResult {
 	private float duration;
 	
 	
-	// TODO needs to be reset on loading from xStream
-	private transient CucumberTestResult parent;
+	// TODO should this be reset on loading from xStream
+	private CucumberTestResult parent;
 
 	FeatureResult(String uri, Feature feature) {
 		this.uri = uri;
@@ -169,26 +169,33 @@ public class FeatureResult extends MetaTabulatedResult {
 		scenarioResults.add(scenarioResult);
 		scenarioResult.setParent(this);
 	}
+	
+	@Override
+	public synchronized String getSafeName() {
+		if (safeName != null) {
+			return safeName;
+		}
+		safeName = uniquifyName(parent.getChildren(), safe(feature.getId()));
+		return safeName;
+	}
 
 	@Override
 	public void tally() {
-		if (scenariosByName == null) {
-			scenariosByName = new TreeMap<String, ScenarioResult>();
+		if (scenariosByID == null) {
+			scenariosByID = new TreeMap<String, ScenarioResult>();
 		}
 		else {
-			scenariosByName.clear();
+			scenariosByID.clear();
 		}
 		passCount = 0;
 		failCount = 0;
 		skipCount = 0;
 		duration = 0.0f;
-
-		
 		
 		for (ScenarioResult sr : scenarioResults) {
 			sr.tally();
 			// XXX scenarious may be duplicated!??!
-			scenariosByName.put(sr.getName(), sr);
+			scenariosByID.put(sr.getSafeName(), sr);
 			passCount += sr.getPassCount();
 			failCount += sr.getFailCount();
 			skipCount += sr.getSkipCount();
@@ -221,12 +228,13 @@ public class FeatureResult extends MetaTabulatedResult {
 		return skipCount;
 	}
 
-   @Override
+
+	@Override
 	public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
 		if (token.equals(getId())) {
 			return this;
 		}
-		ScenarioResult result = scenariosByName.get(token);
+		ScenarioResult result = scenariosByID.get(token);
 		if (result != null) {
 			return result;
 		}

@@ -23,13 +23,12 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.lang.reflect.Field;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import gherkin.formatter.model.Result;
 import gherkin.formatter.model.TagStatement;
+
+import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class CucumberUtils {
@@ -38,11 +37,12 @@ public class CucumberUtils {
 	
 	/** Get the duration (in seconds) that the result took. */
 	static float durationFromResult(Result result) {
+		// internally this is in nanosecodes
 		Long l = result.getDuration();
 		if (l == null) {
 			return 0.0f;
 		}
-		return TimeUnit.SECONDS.convert(l.longValue(), TimeUnit.NANOSECONDS);
+		return l.floatValue() / 1000000000.0f;
 	}
 
 

@@ -27,8 +27,6 @@ import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
-import hudson.tasks.junit.CaseResult;
-import hudson.tasks.junit.SuiteResult;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.HeapSpaceStringConverter;
@@ -165,7 +163,13 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 		}
 		return r;
 	}
-
+	
+// Can't do this as AbstractTestResult is not generic!!!
+//	@Override
+//	public Collection<ScenarioResult> getFailedTests() {
+//		return getResult().getFailedTests();
+//	};
+	
 	public Object getTarget() {
 	   return getResult();
    }

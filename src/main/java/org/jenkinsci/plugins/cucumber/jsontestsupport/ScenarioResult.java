@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 import gherkin.formatter.model.Scenario;
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.CaseResult.Status;
+import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
 import java.util.ArrayList;
@@ -87,11 +88,17 @@ public class ScenarioResult extends TestResult {
 		return scenario.getName();
 	}
 	
+	// XXX: getFullName was added in 1.594+
+	// when we bump core this should be tagged as an override.
+	/* @Override */
+	public String getFullName() {
+		return getParent().getName() + " \u01c2 " + getName();
+	}
+
 	/*
 	 * Whilst a ScenarioResult contains a TestResult we do not count those individually. That would be akin to
 	 * reporting each JUnit Assert as a test.
 	 */
-
 	@Override
 	public int getFailCount() {
 		return (failed ? 1 : 0);
@@ -162,7 +169,10 @@ public class ScenarioResult extends TestResult {
 
 	@Override
 	public TestResult findCorrespondingResult(String id) {
-		// TODO Auto-generated method stub
+		// we have no children so it is either us or null
+		if (id.equals(getId())) {
+			return this;
+		}
 		return null;
 	}
 
@@ -309,5 +319,44 @@ public class ScenarioResult extends TestResult {
 	
 	public String getSource() {
 		return ScenarioToHTML.getHTML(this); 
+	}
+	
+	@Override
+	// Takes into account that this can be reached from a TagResult as well as a FeatureResult. 
+	public String getRelativePathFrom(TestObject from) {
+		if (from == this) {
+			return ".";
+		}
+		
+		String path = _getRelativePathFrom(from, this);
+		if (path == null) {
+			// try our parent as we could be coming indirectly from a tag not a Feature
+			path = _getRelativePathFrom(from.getParent(), this);
+			if (path != null) {
+				path = "../" + path;
+			}
+		}
+		if (path != null) {
+			return path;
+		}
+		return  super.getRelativePathFrom(from);
+	}
+	
+	private String _getRelativePathFrom(TestObject from, TestObject src) {
+		StringBuilder buf = new StringBuilder();
+		TestObject next = src;
+		TestObject cur = next;
+		// Walk up my ancestors from leaf to root, looking for "from"
+		// and accumulating a relative url as I go
+		while (next != null && from != next) {
+			cur = next;
+			buf.insert(0, '/');
+			buf.insert(0, cur.getSafeName());
+			next = cur.getParent();
+		}
+		if (from == next) {
+			return buf.toString();
+		}
+		return null;
 	}
 }

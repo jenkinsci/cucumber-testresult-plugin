@@ -92,7 +92,7 @@ public class ScenarioToHTML {
 		sb.append("<tbody>\n");
 		// being gherkin output...
 
-		addBasicStatement(sb, scenarioResult.getParent().getFeature());
+		addTagStatement(sb, scenarioResult.getParent().getFeature());
 		indent++;
 
 		for (BeforeAfterResult before : scenarioResult.getBeforeResults()) {
@@ -100,7 +100,7 @@ public class ScenarioToHTML {
 		}
 		addBackgroundResult(sb, scenarioResult.getBackgroundResult());
 
-		addDescribedStatement(sb, scenarioResult.getScenario());
+		addTagStatement(sb, scenarioResult.getScenario());
 		indent++;
 
 		for (StepResult stepResult : scenarioResult.getStepResults()) {
@@ -115,7 +115,7 @@ public class ScenarioToHTML {
 	}
 
 
-	private StringBuilder addBasicStatement(StringBuilder sb, TagStatement tagStatement) {
+	private StringBuilder addTagStatement(StringBuilder sb, TagStatement tagStatement) {
 		for (Comment comment : tagStatement.getComments()) {
 			addComment(sb, comment);
 		}
@@ -129,7 +129,19 @@ public class ScenarioToHTML {
 		return sb;
 	}
 
-
+	public StringBuilder addDescribedStatement(StringBuilder sb, DescribedStatement ds) {
+		for (Comment comment : ds.getComments()) {
+			addComment(sb, comment);
+		}
+		createLine(sb, ds.getLine(), RESULT_TYPE.NO_RESULT);
+		appendKeyword(sb, ds.getKeyword());
+		sb.append(' ');
+		sb.append(ds.getName());
+		endLine(sb);
+		return sb;
+	}
+	
+	
 	private StringBuilder createLine(StringBuilder sb, Integer line, RESULT_TYPE type) {
 		String lineStr = String.format("%03d", line);
 		return createLine(sb, lineStr, type);
@@ -156,19 +168,6 @@ public class ScenarioToHTML {
 	public StringBuilder addComment(StringBuilder sb, Comment comment) {
 		createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT);
 		sb.append(comment.getValue());
-		endLine(sb);
-		return sb;
-	}
-
-
-	public StringBuilder addDescribedStatement(StringBuilder sb, DescribedStatement ds) {
-		for (Comment comment : ds.getComments()) {
-			addComment(sb, comment);
-		}
-		createLine(sb, ds.getLine(), RESULT_TYPE.NO_RESULT);
-		appendKeyword(sb, ds.getKeyword());
-		sb.append(' ');
-		sb.append(ds.getName());
 		endLine(sb);
 		return sb;
 	}

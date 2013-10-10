@@ -27,9 +27,11 @@ import gherkin.formatter.model.Tag;
 import hudson.model.AbstractBuild;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
+import hudson.tasks.test.TestResult;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,9 +40,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
-
 /**
  * Represents all the Features from Cucumber.
  * 
@@ -48,6 +47,8 @@ import com.google.common.collect.SetMultimap;
  */
 public class CucumberTestResult extends MetaTabulatedResult {
 
+	public static final String UNTAGGED_TEST_TAG = "@_UNTAGGED_";
+	
 	private static final long serialVersionUID = 3499017799686036745L;
 
 	private List<FeatureResult> featureResults = new ArrayList<FeatureResult>();
@@ -68,7 +69,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	 * map of Tags to Scenarios. 
 	 * recomputed by a call to {@link CucumberTestResult#tally()}
 	 */
-	private transient SetMultimap<String, ScenarioResult> tagMap =  HashMultimap.create();
+	private transient Map<String, TagResult> tagMap =  new HashMap<String, TagResult>();
 
 	private transient AbstractBuild<?, ?> owner;
 	
@@ -100,7 +101,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	@Override
 	public String getName() {
-		return "Cucumber Tests";
+		return "cucumber";
 	}
 
 
@@ -140,6 +141,9 @@ public class CucumberTestResult extends MetaTabulatedResult {
 		for (FeatureResult fr : featureResults) {
 			fr.setOwner(owner);
 		}
+		for (TagResult tr : tagMap.values()) {
+			tr.setOwner(owner);
+		}
 	}
 
 	
@@ -150,9 +154,36 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 
 	@Override
-	public hudson.tasks.test.TestResult findCorrespondingResult(String id) {
-		// TODO Auto-generated method stub
-		return null;
+	public TestResult findCorrespondingResult(String id) {
+		TestResult retVal = null;
+		if (getId().equals(id) || (id == null)) {
+			retVal = this;
+		}
+
+		else if (id.startsWith(getId() + "/")) {
+			String idToFind = id.substring(getId().length() + 1);
+			if (idToFind.startsWith("@")) {
+				// tags have no children - actually they do but they are the child of FeatureResult!
+				retVal = tagMap.get(idToFind);
+			}
+			// either a feature or a scenario
+			else {
+				int idx = idToFind.indexOf("/");
+				if (idx == -1) {
+					retVal = featuresById.get(idToFind);
+				}
+				else {
+					String featureId = idToFind.substring(0, idx);
+					String restId = idToFind.substring(idx + 1);
+
+					FeatureResult fr = featuresById.get(featureId);
+					if (fr != null) {
+						retVal = fr.findCorrespondingResult(restId);
+					}
+				}
+			}
+		}
+		return retVal;
 	}
 
 
@@ -195,7 +226,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 			failedScenarioResults.clear();
 		}
 		if (tagMap == null) {
-			tagMap =  HashMultimap.create();
+			tagMap =  new HashMap<String, TagResult>();
 		}
 		else {
 			tagMap.clear();
@@ -222,14 +253,46 @@ public class CucumberTestResult extends MetaTabulatedResult {
 			failedScenarioResults.addAll(fr.getFailedTests());
 			featuresById.put(fr.getSafeName(), fr);
 			for (ScenarioResult scenarioResult : fr.getChildren()) {
-				for (Tag tag : scenarioResult.getScenario().getTags()) {
-					tagMap.put(tag.getName(), scenarioResult);
+				for (Tag tag : scenarioResult.getParent().getFeature().getTags()) {
+					TagResult tr = tagMap.get(tag.getName());
+					if (tr == null) {
+						tr = new TagResult(tag.getName());
+						tagMap.put(tag.getName(), tr);
+					}
+					tr.addScenarioResult(scenarioResult);
+				}
+				if (scenarioResult.getScenario().getTags().isEmpty()) {
+					TagResult tr = tagMap.get(UNTAGGED_TEST_TAG);
+					if (tr == null) {
+						tr = new TagResult(UNTAGGED_TEST_TAG);
+						tagMap.put(UNTAGGED_TEST_TAG, tr);
+					}
+					tr.addScenarioResult(scenarioResult);
+				}
+				else {
+					for (Tag tag : scenarioResult.getScenario().getTags()) {
+						TagResult tr = tagMap.get(tag.getName());
+						if (tr == null) {
+							tr = new TagResult(tag.getName());
+							tagMap.put(tag.getName(), tr);
+						}
+						tr.addScenarioResult(scenarioResult);
+					}
 				}
 			}
 		}
+		// tally the tagResults
+		for (TagResult tr : tagMap.values()) {
+			tr.setParent(this);
+			tr.tally();
+		}
 	}
 
-	SetMultimap<String,ScenarioResult> getTagMap() {
+	/**
+	 * Map of TagNames to TagResults.
+	 * @return the tagResults keyed by tag.getName().
+	 */
+	public Map<String,TagResult> getTagMap() {
 		return tagMap;
 	}
 
@@ -238,6 +301,12 @@ public class CucumberTestResult extends MetaTabulatedResult {
 		// TODO Tag support!
 		if (token.equals(getId())) {
 			return this;
+		}
+		if (token.startsWith("@")) {
+			TagResult result = tagMap.get(token);
+			if (result != null) {
+				return result;
+			}
 		}
 		FeatureResult result = featuresById.get(token);
 		if (result != null) {

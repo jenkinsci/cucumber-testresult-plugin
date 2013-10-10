@@ -157,17 +157,18 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	private static final long serialVersionUID = 1L;
 
-   
+
 	public DescriptorImpl getDescriptor() {
-      return (DescriptorImpl)super.getDescriptor();
-  }
+		return (DescriptorImpl) super.getDescriptor();
+	}
+
 
 
 	@Extension
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public String getDisplayName() {
-			return "Cucumber result archiver";
+			return "Publish Cucumber test result report";
 		}
 
 

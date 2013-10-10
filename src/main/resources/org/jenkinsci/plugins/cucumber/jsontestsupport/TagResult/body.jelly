@@ -50,7 +50,7 @@ THE SOFTWARE.
   </script>
 
   <j:if test="${it.failCount!=0}">
-    <h2>${%All Failed Scenarios}</h2>
+    <h2>${%Failed Scenarios}</h2>
     <table class="pane sortable">
       <tr>
         <td class="pane-header">${%Test Name}</td>
@@ -86,10 +86,9 @@ THE SOFTWARE.
   </j:if>
 
   <j:if test="${it.totalCount!=0}">
-    <h2>${%All Features}</h2>
+    <h2>${%Scenarios}</h2>
     <table class="pane sortable" id="testresult">
       <j:set var="prevAll" value="${it.previousResult}" />
-      <thead>
       <tr>
         <td class="pane-header">${it.childTitle}</td>
         <td class="pane-header" style="width:5em">${%Duration}</td>
@@ -100,7 +99,6 @@ THE SOFTWARE.
         <td class="pane-header" style="width:5em">${%Total}</td>
         <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
       </tr>
-      </thead>
       <tfoot>
         <tr class="sortbottom">
           <td class="pane-header">Total</td>
@@ -118,7 +116,7 @@ THE SOFTWARE.
           <j:set var="prev" value="${prevAll.findCorrespondingResult(p.id)}" />
           <tr>
             <td class="pane">
-              <a href="${p.safeName}/" class="model-link inside"><span style="${prev==null?'font-weight:bold':''}"><st:out value="${p.displayName}" /></span></a>
+              <a href="${p.getRelativePathFrom(it)}" class="model-link inside"><span style="${prev==null?'font-weight:bold':''}"><st:out value="${p.displayName}" /></span></a>
               <j:forEach var="badge" items="${p.testActions}">
                 <st:include it="${badge}" page="badge.jelly" optional="true"/>
               </j:forEach>

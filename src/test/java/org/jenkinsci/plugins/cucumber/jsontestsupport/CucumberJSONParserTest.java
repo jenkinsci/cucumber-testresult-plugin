@@ -67,7 +67,7 @@ public class CucumberJSONParserTest {
 		TaskListener mockListener = Mockito.mock(TaskListener.class);
 		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
 		
-		CucumberTestResult testresult = parser.parse(files, null, mockListener);
+		CucumberTestResult testresult = parser.parse(files, mockListener);
 
 		Assert.assertEquals("incorrect number of features", testresult.getChildren().size(), 3);
 		// TODO some more asserts, also parse some different files.

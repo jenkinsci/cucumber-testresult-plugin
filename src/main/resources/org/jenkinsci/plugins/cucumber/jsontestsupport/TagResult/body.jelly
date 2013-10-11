@@ -26,180 +26,211 @@ THE SOFTWARE.
 -->
 
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-  <script type="text/javascript">
+	<script type="text/javascript">
 		<!-- TODO make sure load doesn't happen every time -->
 		function showStackTrace(id,query) {
-			var element = document.getElementById(id)
-			element.style.display = "";
-			document.getElementById(id + "-showlink").style.display = "none";
-			document.getElementById(id + "-hidelink").style.display = "";
-			
-			var rqo = new XMLHttpRequest();
-			rqo.open('GET', query, true);
-			rqo.onreadystatechange = function() { element.innerHTML = rqo.responseText; }  
-			rqo.send(null);
+		var element = document.getElementById(id)
+		element.style.display = "";
+		document.getElementById(id + "-showlink").style.display = "none";
+		document.getElementById(id + "-hidelink").style.display = "";
+
+		var rqo = new XMLHttpRequest();
+		rqo.open('GET', query, true);
+		rqo.onreadystatechange = function() { element.innerHTML = rqo.responseText; }
+		rqo.send(null);
 		}
-		
+
 		function hideStackTrace(id) {
-			document.getElementById(id).style.display = "none";
-			document.getElementById(id + "-showlink").style.display = "";
-			document.getElementById(id + "-hidelink").style.display = "none";
+		document.getElementById(id).style.display = "none";
+		document.getElementById(id + "-showlink").style.display = "";
+		document.getElementById(id + "-hidelink").style.display = "none";
 		}
-  </script>
+	</script>
 
-  <j:if test="${it.failCount!=0}">
-    <h2>${%Failed Scenarios}</h2>
-    <table class="pane sortable">
-      <tr>
-        <td class="pane-header">${%Test Name}</td>
-        <td class="pane-header" style="width:4em">${%Duration}</td>
-        <td class="pane-header" style="width:3em">${%Age}</td>
-      </tr>
-      <j:forEach var="f" items="${it.failedTests}" varStatus="i">
-        <tr>
-          <td class="pane">
-            <a id="test-${i.index}-showlink"
-               href="javascript:showStackTrace('test-${i.index}','${f.getRelativePathFrom(it)}/summary')">&gt;&gt;&gt;</a>
-            <a id="test-${i.index}-hidelink" style="display:none"
-               href="javascript:hideStackTrace('test-${i.index}')">&lt;&lt;&lt;</a>
-            <st:nbsp/>
-            <a href="${f.getRelativePathFrom(it)}" class="model-link inside"><st:out value="${f.fullName}"/></a>
-            <j:forEach var="badge" items="${f.testActions}">
-              <st:include it="${badge}" page="badge.jelly" optional="true"/>
-            </j:forEach>
-            <div id="test-${i.index}" class="hidden" style="display:none">
-              ${%Loading...}
-            </div>
-          </td>
-          
-          <td class="pane" style="text-align:right;" data="${f.duration}">
-            ${f.durationString}
-          </td>
-          <td class="pane" style="text-align:right;">
-            <a href="${rootURL}/${f.failedSinceRun.url}" class="model-link inside">${f.age}</a>
-          </td>
-        </tr>
-      </j:forEach>
-    </table>
-  </j:if>
+	<j:if test="${it.failCount!=0}">
+		<h2>${%Failed Scenarios}</h2>
+		<table class="pane sortable">
+			<thead>
+				<tr>
+					<td class="pane-header">${%Test Name}</td>
+					<td class="pane-header" style="width:4em">${%Duration}</td>
+					<td class="pane-header" style="width:3em">${%Age}</td>
+				</tr>
+			</thead>
+			<j:forEach var="f" items="${it.failedTests}" varStatus="i">
+				<tr>
+					<td class="pane">
+						<a id="test-${i.index}-showlink"
+						   href="javascript:showStackTrace('test-${i.index}','${f.getRelativePathFrom(it)}/summary')">&gt;&gt;&gt;</a>
+						<a id="test-${i.index}-hidelink" style="display:none"
+						   href="javascript:hideStackTrace('test-${i.index}')">&lt;&lt;&lt;</a>
+						<st:nbsp/>
+						<a href="${f.getRelativePathFrom(it)}" class="model-link inside">
+							<st:out value="${f.fullName}"/>
+						</a>
+						<j:forEach var="badge" items="${f.testActions}">
+							<st:include it="${badge}" page="badge.jelly" optional="true"/>
+						</j:forEach>
+						<div id="test-${i.index}" class="hidden" style="display:none">
+							${%Loading...}
+						</div>
+					</td>
 
-  <j:if test="${it.totalCount!=0}">
-    <h2>${%Scenarios}</h2>
-    <table class="pane sortable" id="testresult">
-      <j:set var="prevAll" value="${it.previousResult}" />
-      <tr>
-        <td class="pane-header">${it.childTitle}</td>
-        <td class="pane-header" style="width:5em">${%Duration}</td>
-        <td class="pane-header" style="width:5em">${%Fail}</td>
-        <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
-        <td class="pane-header" style="width:5em">${%Skip}</td>
-        <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
-        <td class="pane-header" style="width:5em">${%Total}</td>
-        <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
-      </tr>
-      <tfoot>
-        <tr class="sortbottom">
-          <td class="pane-header">Total</td>
-          <td class="pane-header" style="text-align:right; width:5em" data="${it.durationString}">${it.durationString}</td>
-          <td class="pane-header" style="text-align:right; width:5em">${it.failCount}</td>
-          <td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;" data="${it.failCount-prevALl.failCount}">${h.getDiffString2(it.failCount-prevAll.failCount)}</td>
-          <td class="pane-header" style="text-align:right; width:5em">${it.skipCount}</td>
-          <td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;" data="${it.skipCount-prevAll.skipCount}">${h.getDiffString2(it.skipCount-prevAll.skipCount)}</td>
-          <td class="pane-header" style="text-align:right; width:5em">${it.totalCount}</td>
-          <td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;" data="${it.totalCount-prevAll.totalCount}">${h.getDiffString2(it.totalCount-prevAll.totalCount)}</td>
-      </tr>
-      </tfoot>
-      <tbody>
-        <j:forEach var="p" items="${it.children}">
-          <j:set var="prev" value="${prevAll.findCorrespondingResult(p.id)}" />
-          <tr>
-            <td class="pane">
-              <a href="${p.getRelativePathFrom(it)}" class="model-link inside"><span style="${prev==null?'font-weight:bold':''}"><st:out value="${p.displayName}" /></span></a>
-              <j:forEach var="badge" items="${p.testActions}">
-                <st:include it="${badge}" page="badge.jelly" optional="true"/>
-              </j:forEach>
-            </td>
-            <td class="pane" style="text-align:right" data="${p.duration}">${p.durationString}</td>
-            <td class="pane" style="text-align:right">${p.failCount}</td>
-            <td class="pane" style="text-align:right" data="${p.failCount-prev.failCount}">
-              ${h.getDiffString2(p.failCount-prev.failCount)}
-            </td>
-            <td class="pane" style="text-align:right">${p.skipCount}</td>
-            <td class="pane" style="text-align:right" data="${p.skipCount-prev.skipCount}">
-              ${h.getDiffString2(p.skipCount-prev.skipCount)}
-            </td>
-            <td class="pane" style="text-align:right">${p.totalCount}</td>
-            <td class="pane" style="text-align:right" data="${p.totalCount-prev.totalCount}">
-              ${h.getDiffString2(p.totalCount-prev.totalCount)}
-            </td>
-          </tr>
-        </j:forEach>
-      </tbody>
-    </table>
-  </j:if>
-  
-  
-  <j:if test="${it.tagMap.isEmpty() == false}">
+					<td class="pane" style="text-align:right;" data="${f.duration}">
+						${f.durationString}
+					</td>
+					<td class="pane" style="text-align:right;">
+						<a href="${rootURL}/${f.failedSinceRun.url}" class="model-link inside">${f.age}</a>
+					</td>
+				</tr>
+			</j:forEach>
+		</table>
+	</j:if>
 
-    <h2>${%All Tags}</h2>
-    <table class="pane sortable" id="testresult">
-       <j:set var="prevAll" value="${it.previousResult}" />
- 
-      <thead>
-      <tr>
-        <td class="pane-header">Tag name</td>
-        <td class="pane-header" style="width:5em">${%Duration}</td>
-        <td class="pane-header" style="width:5em">${%Fail}</td>
-        <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
-        <td class="pane-header" style="width:5em">${%Skip}</td>
-        <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
-        <td class="pane-header" style="width:5em">${%Total}</td>
-        <td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
-      </tr>
-      </thead>
-      
-      <tfoot>
-        <tr class="sortbottom">
-          <td class="pane-header">Total</td>
-          <td class="pane-header" style="text-align:right; width:5em" data="${it.durationString}">${it.durationString}</td>
-          <td class="pane-header" style="text-align:right; width:5em">${it.failCount}</td>
-          <td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;" data="${it.failCount-prevALl.failCount}">${h.getDiffString2(it.failCount-prevAll.failCount)}</td>
-          <td class="pane-header" style="text-align:right; width:5em">${it.skipCount}</td>
-          <td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;" data="${it.skipCount-prevAll.skipCount}">${h.getDiffString2(it.skipCount-prevAll.skipCount)}</td>
-          <td class="pane-header" style="text-align:right; width:5em">${it.totalCount}</td>
-          <td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;" data="${it.totalCount-prevAll.totalCount}">${h.getDiffString2(it.totalCount-prevAll.totalCount)}</td>
-      </tr>
-      </tfoot>
-      
-      <tbody>
-        
-        <j:forEach var="p" items="${it.tagMap.values()}">
-          <j:set var="prev" value="${prevAll.findCorrespondingResult(p.id)}" />
-          <tr>
-            <td class="pane">
-              <a href="${p.safeName}/" class="model-link inside"><span style="${prev==null?'font-weight:bold':''}"><st:out value="${p.displayName}" /></span></a>
-              <j:forEach var="badge" items="${p.testActions}">
-                <st:include it="${badge}" page="badge.jelly" optional="true"/>
-              </j:forEach>
-            </td>
-            <td class="pane" style="text-align:right" data="${p.duration}">${p.durationString}</td>
-            <td class="pane" style="text-align:right">${p.failCount}</td>
-            <td class="pane" style="text-align:right" data="${p.failCount-prev.failCount}">
-              ${h.getDiffString2(p.failCount-prev.failCount)}
-            </td>
-            <td class="pane" style="text-align:right">${p.skipCount}</td>
-            <td class="pane" style="text-align:right" data="${p.skipCount-prev.skipCount}">
-              ${h.getDiffString2(p.skipCount-prev.skipCount)}
-            </td>
-            <td class="pane" style="text-align:right">${p.totalCount}</td>
-            <td class="pane" style="text-align:right" data="${p.totalCount-prev.totalCount}">
-              ${h.getDiffString2(p.totalCount-prev.totalCount)}
-            </td>
-          </tr>
-        </j:forEach>
-        </tbody>
-    </table>
-  </j:if>
+	<j:if test="${it.totalCount!=0}">
+		<h2>${%Scenarios}</h2>
+		<table class="pane sortable" id="testresult">
+			<j:set var="prevAll" value="${it.previousResult}"/>
+			<thead>
+				<tr>
+					<td class="pane-header">${it.childTitle}</td>
+					<td class="pane-header" style="width:5em">${%Duration}</td>
+					<td class="pane-header" style="width:5em">${%Fail}</td>
+					<td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
+					<td class="pane-header" style="width:5em">${%Skip}</td>
+					<td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
+					<td class="pane-header" style="width:5em">${%Total}</td>
+					<td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr class="sortbottom">
+					<td class="pane-header">Total</td>
+					<td class="pane-header" style="text-align:right; width:5em" data="${it.durationString}">
+						${it.durationString}
+					</td>
+					<td class="pane-header" style="text-align:right; width:5em">${it.failCount}</td>
+					<td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;"
+					    data="${it.failCount-prevALl.failCount}">${h.getDiffString2(it.failCount-prevAll.failCount)}
+					</td>
+					<td class="pane-header" style="text-align:right; width:5em">${it.skipCount}</td>
+					<td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;"
+					    data="${it.skipCount-prevAll.skipCount}">${h.getDiffString2(it.skipCount-prevAll.skipCount)}
+					</td>
+					<td class="pane-header" style="text-align:right; width:5em">${it.totalCount}</td>
+					<td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;"
+					    data="${it.totalCount-prevAll.totalCount}">${h.getDiffString2(it.totalCount-prevAll.totalCount)}
+					</td>
+				</tr>
+			</tfoot>
+			<tbody>
+				<j:forEach var="p" items="${it.children}">
+					<j:set var="prev" value="${prevAll.findCorrespondingResult(p.id)}"/>
+					<tr>
+						<td class="pane">
+							<a href="${p.getRelativePathFrom(it)}" class="model-link inside">
+								<span style="${prev==null?'font-weight:bold':''}">
+									<st:out value="${p.displayName}"/>
+								</span>
+							</a>
+							<j:forEach var="badge" items="${p.testActions}">
+								<st:include it="${badge}" page="badge.jelly" optional="true"/>
+							</j:forEach>
+						</td>
+						<td class="pane" style="text-align:right" data="${p.duration}">${p.durationString}</td>
+						<td class="pane" style="text-align:right">${p.failCount}</td>
+						<td class="pane" style="text-align:right" data="${p.failCount-prev.failCount}">
+							${h.getDiffString2(p.failCount-prev.failCount)}
+						</td>
+						<td class="pane" style="text-align:right">${p.skipCount}</td>
+						<td class="pane" style="text-align:right" data="${p.skipCount-prev.skipCount}">
+							${h.getDiffString2(p.skipCount-prev.skipCount)}
+						</td>
+						<td class="pane" style="text-align:right">${p.totalCount}</td>
+						<td class="pane" style="text-align:right" data="${p.totalCount-prev.totalCount}">
+							${h.getDiffString2(p.totalCount-prev.totalCount)}
+						</td>
+					</tr>
+				</j:forEach>
+			</tbody>
+		</table>
+	</j:if>
+
+
+	<j:if test="${it.tagMap.isEmpty() == false}">
+
+		<h2>${%All Tags}</h2>
+		<table class="pane sortable" id="testresult">
+			<j:set var="prevAll" value="${it.previousResult}"/>
+
+			<thead>
+				<tr>
+					<td class="pane-header">Tag name</td>
+					<td class="pane-header" style="width:5em">${%Duration}</td>
+					<td class="pane-header" style="width:5em">${%Fail}</td>
+					<td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
+					<td class="pane-header" style="width:5em">${%Skip}</td>
+					<td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
+					<td class="pane-header" style="width:5em">${%Total}</td>
+					<td class="pane-header" style="width:1em; font-size:smaller; white-space:nowrap;">(${%diff})</td>
+				</tr>
+			</thead>
+
+			<tfoot>
+				<tr class="sortbottom">
+					<td class="pane-header">Total</td>
+					<td class="pane-header" style="text-align:right; width:5em" data="${it.durationString}">
+						${it.durationString}
+					</td>
+					<td class="pane-header" style="text-align:right; width:5em">${it.failCount}</td>
+					<td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;"
+					    data="${it.failCount-prevALl.failCount}">${h.getDiffString2(it.failCount-prevAll.failCount)}
+					</td>
+					<td class="pane-header" style="text-align:right; width:5em">${it.skipCount}</td>
+					<td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;"
+					    data="${it.skipCount-prevAll.skipCount}">${h.getDiffString2(it.skipCount-prevAll.skipCount)}
+					</td>
+					<td class="pane-header" style="text-align:right; width:5em">${it.totalCount}</td>
+					<td class="pane-header" style="text-align:right; width:1em; font-size:smaller; white-space:nowrap;"
+					    data="${it.totalCount-prevAll.totalCount}">${h.getDiffString2(it.totalCount-prevAll.totalCount)}
+					</td>
+				</tr>
+			</tfoot>
+
+			<tbody>
+
+				<j:forEach var="p" items="${it.tagMap.values()}">
+					<j:set var="prev" value="${prevAll.findCorrespondingResult(p.id)}"/>
+					<tr>
+						<td class="pane">
+							<a href="${p.safeName}/" class="model-link inside">
+								<span style="${prev==null?'font-weight:bold':''}">
+									<st:out value="${p.displayName}"/>
+								</span>
+							</a>
+							<j:forEach var="badge" items="${p.testActions}">
+								<st:include it="${badge}" page="badge.jelly" optional="true"/>
+							</j:forEach>
+						</td>
+						<td class="pane" style="text-align:right" data="${p.duration}">${p.durationString}</td>
+						<td class="pane" style="text-align:right">${p.failCount}</td>
+						<td class="pane" style="text-align:right" data="${p.failCount-prev.failCount}">
+							${h.getDiffString2(p.failCount-prev.failCount)}
+						</td>
+						<td class="pane" style="text-align:right">${p.skipCount}</td>
+						<td class="pane" style="text-align:right" data="${p.skipCount-prev.skipCount}">
+							${h.getDiffString2(p.skipCount-prev.skipCount)}
+						</td>
+						<td class="pane" style="text-align:right">${p.totalCount}</td>
+						<td class="pane" style="text-align:right" data="${p.totalCount-prev.totalCount}">
+							${h.getDiffString2(p.totalCount-prev.totalCount)}
+						</td>
+					</tr>
+				</j:forEach>
+			</tbody>
+		</table>
+	</j:if>
 </j:jelly>

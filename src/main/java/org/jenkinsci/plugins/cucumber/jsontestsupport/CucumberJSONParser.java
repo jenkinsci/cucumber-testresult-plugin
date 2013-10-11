@@ -27,15 +27,13 @@ import gherkin.JSONParser;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.tasks.test.DefaultTestResultParserImpl;
+import hudson.model.AbstractBuild;
 import hudson.tasks.test.TestResult;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 
@@ -46,8 +44,7 @@ import org.apache.commons.io.FileUtils;
 @Extension
 public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
-	private static final Logger logger = Logger.getLogger(CucumberJSONParser.class.getName());
-
+	private static final long serialVersionUID = -296964473181541824L;
 
 	public CucumberJSONParser() {
 	}
@@ -79,7 +76,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
     *      will not show a stack trace.
     */
 	@Override
-   protected CucumberTestResult parse(List<File> reportFiles, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+   protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
 		
 		CucumberTestResult result = new CucumberTestResult();
 		GherkinCallback callback = new GherkinCallback(result);
@@ -115,7 +112,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 	                        final AbstractBuild build,
 	                        final Launcher launcher,
 	                        final TaskListener listener) throws InterruptedException, IOException {
-		// overridden so we tally and set the owner on the master.  for some reason this worked on a smaller setup but not on a larger setup?
+		// overridden so we tally and set the owner on the master.
 		CucumberTestResult result = (CucumberTestResult) super.parse(testResultLocations, build, launcher, listener);
 		result.tally();
 		result.setOwner(build);

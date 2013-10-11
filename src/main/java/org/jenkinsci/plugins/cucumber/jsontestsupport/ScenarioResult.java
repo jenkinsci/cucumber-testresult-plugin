@@ -316,7 +316,33 @@ public class ScenarioResult extends TestResult {
 			}
 		}
 	}
-	
+
+
+	/**
+	 * If there was an error or a failure, this is the text from the message.
+	 */
+	public String getErrorDetails() {
+		if (!isPassed()) {
+			for (BeforeAfterResult before : getBeforeResults()) {
+				if (!before.isPassed()) {
+					return before.getResult().getErrorMessage();
+				}
+			}
+			for (StepResult step : getStepResults()) {
+				if (!step.isPassed()) {
+					return step.getResult().getErrorMessage();
+				}
+			}
+			for (BeforeAfterResult after : getAfterResults()) {
+				if (!after.isPassed()) {
+					return after.getResult().getErrorMessage();
+				}
+			}
+		}
+		return null;
+	}
+
+
 	public String getSource() {
 		return ScenarioToHTML.getHTML(this); 
 	}

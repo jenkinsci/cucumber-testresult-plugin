@@ -93,7 +93,6 @@ public class ScenarioToHTML {
 		// being gherkin output...
 
 		addTagStatement(sb, scenarioResult.getParent().getFeature());
-		indent++;
 
 		for (BeforeAfterResult before : scenarioResult.getBeforeResults()) {
 			addBeforeAfterResult(sb, "before", before);
@@ -101,7 +100,6 @@ public class ScenarioToHTML {
 		addBackgroundResult(sb, scenarioResult.getBackgroundResult());
 
 		addTagStatement(sb, scenarioResult.getScenario());
-		indent++;
 
 		for (StepResult stepResult : scenarioResult.getStepResults()) {
 			addStepResult(sb, stepResult);
@@ -125,6 +123,20 @@ public class ScenarioToHTML {
 		}
 		createLine(sb, tagStatement.getLine(), RESULT_TYPE.NO_RESULT);
 		appendKeyword(sb, tagStatement.getKeyword()).append(' ').append(tagStatement.getName());
+		String descr = tagStatement.getDescription();
+		indent++;
+		if (descr != null && !descr.isEmpty()) {
+			// may have been run on windows?
+			descr = descr.replace("\r\n", "\n");
+			String[] lines = descr.split("\\n");
+			for (int i=0; i < lines.length; i++){
+				endLine(sb);
+				createLine(sb, tagStatement.getLine() + i+1, RESULT_TYPE.NO_RESULT);
+				sb.append("<span style=\"font-style:italic\">");
+				sb.append(lines[i]);
+				sb.append("</span>");
+			}
+		}
 		endLine(sb);
 		return sb;
 	}
@@ -167,14 +179,17 @@ public class ScenarioToHTML {
 
 	public StringBuilder addComment(StringBuilder sb, Comment comment) {
 		createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT);
+		sb.append("<span style=\"font-style:italic; color: #666666\">");
 		sb.append(comment.getValue());
+		sb.append("</span>");
+
 		endLine(sb);
 		return sb;
 	}
 
 
 	public StringBuilder appendKeyword(StringBuilder sb, String keyword) {
-		sb.append("<span style=\"font-weight: bold\">").append(keyword).append("</span>");
+		sb.append("<span style=\"font-weight: bold; color: ##4D0080\">").append(keyword).append("</span>");
 		return sb;
 	}
 

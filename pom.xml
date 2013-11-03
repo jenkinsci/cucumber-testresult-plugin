@@ -43,7 +43,7 @@
 	<name>Cucumber json test reporting.</name>
 	<description>This plugin understands cucumber json files and converts them to Jenkins TestCase so they can be seen in the standard test reports.
 	</description>
-	<url>http://wiki.jenkins-ci.org/display/JENKINS/Cucumber+TestResult+Plugin</url>
+	<url>http://wiki.jenkins-ci.org/display/JENKINS/Cucumber+Test+Result+Plugin</url>
 	<inceptionYear>2013</inceptionYear>
 
 	<properties>

@@ -36,7 +36,7 @@
 
 	<groupId>org.jenkins-ci.plugins</groupId>
 	<artifactId>cucumber-testresult-plugin</artifactId>
-	<version>0.1-beta</version>
+	<version>0.2-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<name>Cucumber json test reporting.</name>

@@ -30,30 +30,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static  org.hamcrest.core.Is.is;
+
 public class CucumberJSONParserTest {
 
-	
-//	@Test
-//	public void testParsingCMDC() throws Exception {
-//		CucumberJSONParser parser = new CucumberJSONParser();
-//		
-//		File f = new File("C:\\Users\\nordj\\Desktop\\CMDCGlue.json");
-//		
-//		List<File> files = new ArrayList<File>();
-//		files.add(f);
-//		
-//		TaskListener mockListener = Mockito.mock(TaskListener.class);
-//		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
-//		
-//		CucumberTestResult testresult = parser.parse(files, null, mockListener);
-//
-//		Assert.assertEquals("incorrect number of features", testresult.getChildren().size(), 3);
-//	}
-	
 
 	@Test
 	public void testParsing() throws Exception {
@@ -69,8 +57,16 @@ public class CucumberJSONParserTest {
 		
 		CucumberTestResult testresult = parser.parse(files, mockListener);
 
-		Assert.assertEquals("incorrect number of features", testresult.getChildren().size(), 3);
-		// TODO some more asserts, also parse some different files.
+		assertThat("Tests passed", testresult.isPassed(), is(true));
+		assertThat("Correct # of passing tests", testresult.getPassCount(), is(8));
+		assertThat("Correct # of failing tests", testresult.getFailCount(), is(0));
+		assertThat("Correct # of skipped tests", testresult.getSkipCount(), is(0));
+		assertThat("Duration is correct", testresult.getDuration(), is(0.027902983F));
+		assertThat("Duration string is correct", testresult.getDurationString(), is("27 ms"));
+		assertThat("Correct # of children", testresult.getChildren(), hasSize(3));
+		assertThat("Correct # of features", testresult.getFeatures(), hasSize(3));
+
+		// Get the individual Features and check there scenarious.
 	}
 
 

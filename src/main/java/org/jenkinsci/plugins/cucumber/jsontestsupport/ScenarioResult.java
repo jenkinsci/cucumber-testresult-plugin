@@ -323,6 +323,9 @@ public class ScenarioResult extends TestResult {
 	 * If there was an error or a failure, this is the text from the message.
 	 */
 	public String getErrorDetails() {
+		// TODO - although we can only have one ErrorDetails
+		// and only one step can be a failure - we could have multiple
+		// undefined options - so we should list all the undefined options here..
 		if (!isPassed()) {
 			if(backgroundResult != null && !backgroundResult.isPassed()) {
 				for (StepResult step : backgroundResult.getStepResults()) {

@@ -95,7 +95,7 @@ public class StepResult extends TestResult {
 	 * Gets the total number of passed tests.
 	 */
 	public int getPassCount() {
-		return Result.PASSED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.PASSED_TEST_STRING.equals(result.getStatus()) ? 1 : 0;
 	}
 
 
@@ -103,7 +103,11 @@ public class StepResult extends TestResult {
 	 * Gets the total number of failed tests.
 	 */
 	public int getFailCount() {
-		return Result.FAILED.equals(result.getStatus()) ? 1 : 0;
+		if (CucumberUtils.FAILED_TEST_STRING.equals(result.getStatus())
+			    || CucumberUtils.UNDEFINED_TEST_STRING.equals(result.getStatus())) {
+			return 1;
+		}
+		return 0;
 	}
 
 
@@ -111,7 +115,7 @@ public class StepResult extends TestResult {
 	 * Gets the total number of skipped tests.
 	 */
 	public int getSkipCount() {
-		return Result.SKIPPED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.SKIPPED_TEST_STRING.equals(result.getStatus()) ? 1 : 0;
 	}
 
 

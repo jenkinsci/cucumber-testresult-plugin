@@ -115,8 +115,8 @@ public class CucumberJSONParserTest {
 		assertThat("Correct # of passing tests", testresult.getPassCount(), is(7));
 		assertThat("Correct # of failing tests", testresult.getFailCount(), is(1));
 		assertThat("Correct # of skipped tests", testresult.getSkipCount(), is(0));
-		assertThat("Duration is correct", testresult.getDuration(), is(0.12737842F));
-		assertThat("Duration string is correct", testresult.getDurationString(), is("0.12 sec"));
+		assertThat("Duration is correct", testresult.getDuration(), is(0.023931958F));
+		assertThat("Duration string is correct", testresult.getDurationString(), is("23 ms"));
 		assertThat("Correct # of children", testresult.getChildren(), hasSize(3));
 		assertThat("Correct # of features", testresult.getFeatures(), hasSize(3));
 

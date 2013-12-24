@@ -34,7 +34,13 @@ import java.util.logging.Logger;
 public class CucumberUtils {
 
 	private static final Logger LOG = Logger.getLogger(CucumberUtils.class.getName());
-	
+
+	public static final String FAILED_TEST_STRING = "failed";
+	public static final String PASSED_TEST_STRING = "passed";
+	public static final String UNDEFINED_TEST_STRING = "undefined";
+	public static final String SKIPPED_TEST_STRING = "skipped";
+
+
 	/** Get the duration (in seconds) that the result took. */
 	static float durationFromResult(Result result) {
 		// internally this is in nanosecodes
@@ -73,4 +79,5 @@ public class CucumberUtils {
 		}
 		return null;
 	}
+
 }

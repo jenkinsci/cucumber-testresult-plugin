@@ -60,21 +60,34 @@ public class BeforeAfterResult extends TestResult {
 	}
 
 
-	@Override
-	public int getFailCount() {
-		return Result.FAILED.equals(result.getStatus()) ? 1 : 0;
-	}
-
-
-	@Override
-	public int getSkipCount() {
-		return Result.SKIPPED.equals(result.getStatus()) ? 1 : 0;
-	}
-
-
+	/**
+	 * Gets the total number of passed tests.
+	 */
 	@Override
 	public int getPassCount() {
-		return Result.PASSED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.PASSED_TEST_STRING.equals(result.getStatus()) ? 1 : 0;
+	}
+
+
+	/**
+	 * Gets the total number of failed tests.
+	 */
+	@Override
+	public int getFailCount() {
+		if (CucumberUtils.FAILED_TEST_STRING.equals(result.getStatus())
+				  || CucumberUtils.UNDEFINED_TEST_STRING.equals(result.getStatus())) {
+			return 1;
+		}
+		return 0;
+	}
+
+
+	/**
+	 * Gets the total number of skipped tests.
+	 */
+	@Override
+	public int getSkipCount() {
+		return CucumberUtils.SKIPPED_TEST_STRING.equals(result.getStatus()) ? 1 : 0;
 	}
 
 
@@ -115,7 +128,7 @@ public class BeforeAfterResult extends TestResult {
 	}
 
 
-	Match getMacth() {
+	Match getMatch() {
 		return macth;
 	}
 

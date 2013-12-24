@@ -121,6 +121,8 @@ public class ScenarioResult extends TestResult {
 	
 	@Override
 	public int getSkipCount() {
+		// skipped scenarios have been skipped as the glue isn't implemented.
+		// this should be reported as a test error.
 		return 0;
 	}
 
@@ -230,8 +232,8 @@ public class ScenarioResult extends TestResult {
 	// stapler strips the trailing 's'
 	public Status getStatus() {
 		if (getSkipCount() > 0) {
-			// cucumber doesn't report skipped scenarios
-			return Status.SKIPPED;
+			// skipped scenarios have been skipped as the glue isn't implemented.
+			// this should be reported as a test error.
 		}
 		ScenarioResult psr = (ScenarioResult) getPreviousResult();
 		if (psr == null) {
@@ -322,12 +324,13 @@ public class ScenarioResult extends TestResult {
 	/**
 	 * If there was an error or a failure, this is the text from the message.
 	 */
+	@Exported(visibility = -15)
 	public String getErrorDetails() {
 		if (!isPassed()) {
 			if(backgroundResult != null && !backgroundResult.isPassed()) {
 				for (StepResult step : backgroundResult.getStepResults()) {
 					if (!step.isPassed()) {
-						return step.getResult().getErrorMessage();
+						return step.getErrorMessage();
 					}
 				}
 			}
@@ -350,7 +353,7 @@ public class ScenarioResult extends TestResult {
 		return null;
 	}
 
-
+	@Exported(visibility = -20)
 	public String getSource() {
 		return ScenarioToHTML.getHTML(this); 
 	}

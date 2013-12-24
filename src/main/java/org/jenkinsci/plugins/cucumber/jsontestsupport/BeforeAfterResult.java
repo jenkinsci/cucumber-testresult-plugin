@@ -33,7 +33,7 @@ import hudson.model.AbstractBuild;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
-
+import org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberUtils.GherkinState;
 /**
  * Represents a Before or After belonging to a Scenario. Although this is a test Object as it is a background
  * it is not intended for individual Display.
@@ -62,19 +62,20 @@ public class BeforeAfterResult extends TestResult {
 
 	@Override
 	public int getFailCount() {
-		return Result.FAILED.equals(result.getStatus()) ? 1 : 0;
+		return GherkinState.parseState(result.getStatus()).isFailureState() ? 1 : 0;
 	}
 
 
 	@Override
 	public int getSkipCount() {
-		return Result.SKIPPED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.GherkinState.parseState(result.getStatus()).isSkippedState() ? 1 : 0;
+
 	}
 
 
 	@Override
 	public int getPassCount() {
-		return Result.PASSED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.GherkinState.parseState(result.getStatus()).isPassedState() ? 1 : 0;
 	}
 
 

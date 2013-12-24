@@ -28,6 +28,7 @@ import gherkin.formatter.model.Result;
 import gherkin.formatter.model.Step;
 import hudson.model.AbstractBuild;
 import hudson.tasks.test.TestResult;
+import org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberUtils.GherkinState;
 
 /**
  * Represents a Step belonging to a Scenario from Cucumber.
@@ -95,7 +96,7 @@ public class StepResult extends TestResult {
 	 * Gets the total number of passed tests.
 	 */
 	public int getPassCount() {
-		return Result.PASSED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.GherkinState.parseState(result.getStatus()).isPassedState() ? 1 : 0;
 	}
 
 
@@ -103,7 +104,7 @@ public class StepResult extends TestResult {
 	 * Gets the total number of failed tests.
 	 */
 	public int getFailCount() {
-		return Result.FAILED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.GherkinState.parseState(result.getStatus()).isFailureState() ? 1 : 0;
 	}
 
 
@@ -111,7 +112,7 @@ public class StepResult extends TestResult {
 	 * Gets the total number of skipped tests.
 	 */
 	public int getSkipCount() {
-		return Result.SKIPPED.equals(result.getStatus()) ? 1 : 0;
+		return CucumberUtils.GherkinState.parseState(result.getStatus()).isSkippedState() ? 1 : 0;
 	}
 
 
@@ -127,5 +128,24 @@ public class StepResult extends TestResult {
 
 	Result getResult() {
 		return result;
+	}
+
+	public String getErrorMessage() {
+		String retVal = "";
+		GherkinState state = GherkinState.parseState(result.getStatus());
+		switch (state) {
+			case UNDEFINED:
+				retVal = "Step \"" + step.getName() + "\" is undefined";
+				break;
+			case FAILED:
+				retVal = result.getErrorMessage();
+				break;
+			case PASSED:
+				//fallthrough
+			case SKIPPED:
+				retVal = "";
+				break;
+		}
+		return retVal;
 	}
 }

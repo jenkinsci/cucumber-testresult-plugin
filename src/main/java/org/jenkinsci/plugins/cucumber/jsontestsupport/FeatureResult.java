@@ -84,7 +84,7 @@ public class FeatureResult extends MetaTabulatedResult {
 		return getName();
 	}
 
-	@Exported(visibility=9)
+	@Exported(visibility=5)
 	public String getName() {
 		return feature.getName();
 	}
@@ -95,7 +95,7 @@ public class FeatureResult extends MetaTabulatedResult {
 		return scenarioResults;
 	}
 
-	@Exported(visibility=9)
+	@Exported(visibility=5)
 	public Collection<ScenarioResult> getScenarioResults() {
 		return scenarioResults;
 	}
@@ -204,24 +204,28 @@ public class FeatureResult extends MetaTabulatedResult {
 	
 
 	@Override
+	@Exported(visibility = 5)
 	public int getFailCount() {
 		return failCount;
 	}
 
 
 	@Override
+	@Exported(visibility = 5)
 	public int getPassCount() {
 		return passCount;
 	}
 
 
 	@Override
+	@Exported(visibility = 5)
 	public float getDuration() {
 		return duration;
 	}
 
 
 	@Override
+	@Exported(visibility = 5)
 	public int getSkipCount() {
 		// always zero?
 		return skipCount;

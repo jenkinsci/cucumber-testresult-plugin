@@ -73,4 +73,64 @@ public class CucumberUtils {
 		}
 		return null;
 	}
+
+	public enum GherkinState {
+		UNDEFINED(false, false, true),
+		PASSED(true, false, false),
+		FAILED(false, false, true),
+		SKIPPED(false, true, false);
+
+		private static final String SKIPPED_STRING = "skipped";
+		private static final String UNDEFINED_STRING = "undefined";
+		private static final String PASSED_STRING = "passed";
+		private static final String FAILED_STRING = "failed";
+
+		private boolean passed;
+		private boolean skipped;
+		private boolean failure;
+
+		private GherkinState(boolean passed, boolean skipped, boolean failure) {
+			// skipped is neither a pass nor a failure!
+			this.passed = passed;
+			this.skipped = skipped;
+			this.failure = failure;
+		}
+
+		/**
+		 * Return true if this represents a failure of the Gherkin Step.
+		 */
+		public boolean isFailureState() {
+			return failure;
+		}
+
+		/**
+		 * Return true if this represents a pass of the Gherkin step.
+		 */
+		public boolean isPassedState() {
+			return passed;
+		}
+
+		/**
+		 * Return true if this represents a skipp of the Gherkin step (which is neither a pass nor a fail.
+		 */
+		public boolean isSkippedState() {
+			return skipped;
+		}
+
+		public static GherkinState parseState(String state) {
+			if (PASSED_STRING.equals(state)) {
+				return PASSED;
+			}
+			if (FAILED_STRING.equals(state)) {
+				return FAILED;
+			}
+			if (SKIPPED_STRING.equals(state)) {
+				return SKIPPED;
+			}
+			if (UNDEFINED_STRING.equals(state)) {
+				return UNDEFINED;
+			}
+			throw new CucumberModelException("Cucumber sate \"" + state + "\" is not defined.");
+		}
+	}
 }

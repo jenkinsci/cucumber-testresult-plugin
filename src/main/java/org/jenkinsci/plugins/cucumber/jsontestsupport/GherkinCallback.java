@@ -44,7 +44,7 @@ import java.util.List;
  */
 class GherkinCallback implements Formatter, Reporter {
 
-	private boolean debug = false;
+	private boolean debug = true;
 	
 	private FeatureResult currentFeatureResult = null;
 	private ScenarioResult currentScenarioResult = null;
@@ -134,6 +134,20 @@ class GherkinCallback implements Formatter, Reporter {
 		}
 	}
 
+	// appears to not be called.
+	 public void startOfScenarioLifeCycle(Scenario scenario) {
+		if (debug) {
+			System.out.println("startOfScenarioLifeCycle: " + scenario.getName());
+		}
+	}
+
+	// appears to not be called.
+	public void endOfScenarioLifeCycle(Scenario scenario) {
+		if (debug) {
+			System.out.println("endOfScenarioLifeCycle: " + scenario.getName());
+		}
+	}
+
 
 	// A step has been called - could be in a background or a Scenario
 	public void step(Step step) {
@@ -147,6 +161,8 @@ class GherkinCallback implements Formatter, Reporter {
 		}
 		currentStep = step;
 	}
+
+
 
 
 	// marks the end of a feature

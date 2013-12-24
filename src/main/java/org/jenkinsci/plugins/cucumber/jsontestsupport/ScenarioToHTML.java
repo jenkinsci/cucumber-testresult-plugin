@@ -42,7 +42,7 @@ public class ScenarioToHTML {
 	private enum RESULT_TYPE {
 
 		/** Step failed as it was not defined */
-		UNDEFINED(""),
+		UNDEFINED("background-color: #ffeeee;"),
 		/** step passed */
 		PASSED("background-color: #e6ffcc;"),
 		/** step failed */
@@ -197,7 +197,7 @@ public class ScenarioToHTML {
 	public StringBuilder addBeforeAfterResult(StringBuilder sb,
 	                                          String beforeOrAfter,
 	                                          BeforeAfterResult beforeAfter) {
-		Match m = beforeAfter.getMacth();
+		Match m = beforeAfter.getMatch();
 		Result r = beforeAfter.getResult();
 		createLine(sb, beforeOrAfter, RESULT_TYPE.typeFromResult(r));
 		sb.append(m.getLocation()).append(' ');
@@ -224,6 +224,11 @@ public class ScenarioToHTML {
 			 * Throwable t = result.getError(); if (t != null) { StackTraceElement stack[] = t.getStackTrace();
 			 * for (StackTraceElement ste : stack) { sb.append(ste.toString()).append("<br>"); } }
 			 */
+		}
+		else if ("undefined".equals(result.getStatus())) {
+			createLine(sb, "Undefined", RESULT_TYPE.UNDEFINED);
+			sb.append("Step is undefined");
+			// We have no error message.
 		}
 		endLine(sb);
 		return sb;

@@ -324,6 +324,13 @@ public class ScenarioResult extends TestResult {
 	 */
 	public String getErrorDetails() {
 		if (!isPassed()) {
+			if(backgroundResult != null && !backgroundResult.isPassed()) {
+				for (StepResult step : backgroundResult.getStepResults()) {
+					if (!step.isPassed()) {
+						return step.getResult().getErrorMessage();
+					}
+				}
+			}
 			for (BeforeAfterResult before : getBeforeResults()) {
 				if (!before.isPassed()) {
 					return before.getResult().getErrorMessage();

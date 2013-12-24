@@ -298,11 +298,12 @@ public class ScenarioResult extends TestResult {
 		}
 		
 		if (backgroundResult != null) {
+			backgroundResult.tally();
 			duration += backgroundResult.getDuration();
 			if (backgroundResult.getFailCount() != 0) {
 				failed = true;
 			}
-		}		
+		}
 		for (BeforeAfterResult bar : beforeResults) {
 			duration += bar.getDuration();
 			if (bar.getFailCount() != 0) {

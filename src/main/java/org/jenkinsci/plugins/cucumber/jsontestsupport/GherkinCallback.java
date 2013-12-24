@@ -44,7 +44,7 @@ import java.util.List;
  */
 class GherkinCallback implements Formatter, Reporter {
 
-	private boolean debug = true;
+	private boolean debug = false;
 	
 	private FeatureResult currentFeatureResult = null;
 	private ScenarioResult currentScenarioResult = null;

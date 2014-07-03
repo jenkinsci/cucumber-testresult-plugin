@@ -257,7 +257,7 @@ public class ScenarioResult extends TestResult {
 		if (failedSince == 0 && getFailCount() == 1) {
 			ScenarioResult prev = (ScenarioResult) getPreviousResult();
 			if (prev != null && !prev.isPassed())
-				this.failedSince = prev.failedSince;
+				this.failedSince = prev.getFailedSince();
 			else if (getOwner() != null) {
 				this.failedSince = getOwner().getNumber();
 			}

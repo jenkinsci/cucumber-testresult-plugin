@@ -104,26 +104,36 @@
 	</dependencies>
 
 	<build>
+		<plugins>
+				<plugin>
+						<!-- until the fix for JENKINS-18918 is available in a backported 
+								skip any apache-maven-xxx folders in classes -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<version>2.4</version>
+						<configuration>
+								<excludes>
+										<exclude>**/apache-maven-*/*</exclude>
+								</excludes>
+						</configuration>
+				</plugin>
+				<plugin>
+						<groupId>org.jenkins-ci.tools</groupId>
+						<artifactId>maven-hpi-plugin</artifactId>
+						<version>1.96</version>
+						<extensions>true</extensions>
+				</plugin>
+		</plugins>
+		<pluginManagement>
 			<plugins>
-					<plugin>
-							<!-- until the fix for JENKINS-18918 is available in a backported 
-									skip any apache-maven-xxx folders in classes -->
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-jar-plugin</artifactId>
-							<version>2.4</version>
-							<configuration>
-									<excludes>
-											<exclude>**/apache-maven-*/*</exclude>
-									</excludes>
-							</configuration>
-					</plugin>
-					<plugin>
-							<groupId>org.jenkins-ci.tools</groupId>
-							<artifactId>maven-hpi-plugin</artifactId>
-							<version>1.96</version>
-							<extensions>true</extensions>
-					</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<!-- work around MRELEASE-875 -->
+					<version>2.5</version>
+				</plugin>
 			</plugins>
+		</pluginManagement>
 	</build>
 
 	<!-- Jenkins is no longer synced to central so we need to bootstrap -->

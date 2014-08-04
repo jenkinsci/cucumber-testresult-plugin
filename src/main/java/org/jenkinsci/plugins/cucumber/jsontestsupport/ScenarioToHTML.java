@@ -50,7 +50,9 @@ public class ScenarioToHTML {
 		/** step skipped due to previous failure */
 		SKIPPED("background-color: #ffffcc;"),
 		/** line does not have a result */
-		NO_RESULT("");
+		NO_RESULT(""),
+		/** glue code is not implemented */
+		PENDING("background-color: #ffeeee;");
 
 		public final String css;
 

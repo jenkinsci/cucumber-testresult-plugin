@@ -38,6 +38,7 @@ public class CucumberUtils {
 	public static final String FAILED_TEST_STRING = "failed";
 	public static final String PASSED_TEST_STRING = "passed";
 	public static final String UNDEFINED_TEST_STRING = "undefined";
+	public static final String PENDING_TEST_STRING = "pending";
 	public static final String SKIPPED_TEST_STRING = "skipped";
 
 

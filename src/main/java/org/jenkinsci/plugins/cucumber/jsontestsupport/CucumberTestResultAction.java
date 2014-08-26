@@ -174,4 +174,14 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 	   return getResult();
    }
 
+
+   @Override
+    public String getDisplayName() {
+       return "Cucumber Test Result";
+   }
+
+   @Override
+    public  String getUrlName() {
+       return "cucumberTestReport";
+   }
 }

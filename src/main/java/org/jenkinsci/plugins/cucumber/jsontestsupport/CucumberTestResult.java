@@ -222,7 +222,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	// @Override - this is an interface method
 	public String getDisplayName() {
-		return "Test Results";
+		return "Cucumber Test Results";
 	}
 	
 

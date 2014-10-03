@@ -1,0 +1,92 @@
+[
+  {
+    "id": "connectivity",
+    "description": "As a user I want to be able to connect to the Oracle instance via JDBC",
+    "name": "Connectivity",
+    "keyword": "Feature",
+    "line": 1,
+    "elements": [
+      {
+        "id": "connectivity;i-can-connect-to-the-database-instance",
+        "description": "",
+        "name": "I can connect to the database instance",
+        "keyword": "Scenario",
+        "line": 4,
+        "steps": [
+          {
+            "result": {
+              "duration": 98840000,
+              "status": "passed"
+            },
+            "name": "a service instance exists",
+            "keyword": "Given ",
+            "line": 5,
+            "match": {
+              "location": "JDBCStepDefs.a_service_instance_exists()"
+            }
+          },
+          {
+            "result": {
+              "duration": 53000,
+              "status": "passed"
+            },
+            "name": "I have a JDBC connection URL",
+            "keyword": "And ",
+            "line": 6,
+            "match": {
+              "location": "JDBCStepDefs.i_have_a_JDBC_connection_URL()"
+            }
+          },
+          {
+            "result": {
+              "duration": 1920000,
+              "status": "pending",
+              "error_message": "cucumber.api.PendingException: TODO: implement me\n\tat com.cisco.vci.service.oracle.aat.glue.JDBCStepDefs.i_have_a_username(JDBCStepDefs.java:55)\n\tat âœ½.And I have a username(features/Conectivity.feature:7)\n"
+            },
+            "name": "I have a username",
+            "keyword": "And ",
+            "line": 7,
+            "match": {
+              "location": "JDBCStepDefs.i_have_a_username()"
+            }
+          },
+          {
+            "result": {
+              "status": "skipped"
+            },
+            "name": "I have a password",
+            "keyword": "And ",
+            "line": 8,
+            "match": {
+              "location": "JDBCStepDefs.i_have_a_password()"
+            }
+          },
+          {
+            "result": {
+              "status": "skipped"
+            },
+            "name": "I have configure the JDBC driver",
+            "keyword": "When ",
+            "line": 9,
+            "match": {
+              "location": "JDBCStepDefs.i_have_configure_the_JDBC_driver()"
+            }
+          },
+          {
+            "result": {
+              "status": "skipped"
+            },
+            "name": "I should be able to connect via JDBC without issues",
+            "keyword": "Then ",
+            "line": 10,
+            "match": {
+              "location": "JDBCStepDefs.i_should_be_able_to_connect_via_JDBC_without_issues()"
+            }
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "uri": "features/Conectivity.feature"
+  }
+]

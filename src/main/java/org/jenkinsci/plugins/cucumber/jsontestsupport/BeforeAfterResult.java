@@ -87,7 +87,11 @@ public class BeforeAfterResult extends TestResult {
 	 */
 	@Override
 	public int getSkipCount() {
-		return CucumberUtils.SKIPPED_TEST_STRING.equals(result.getStatus()) ? 1 : 0;
+		if (CucumberUtils.SKIPPED_TEST_STRING.equals(result.getStatus())
+		    || CucumberUtils.PENDING_TEST_STRING.equals(result.getStatus())) {
+			return 1;
+		}
+		return 0;
 	}
 
 

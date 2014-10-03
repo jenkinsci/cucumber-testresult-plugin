@@ -203,7 +203,6 @@ public class TagResult extends MetaTabulatedResult {
 
 	@Override
 	public int getSkipCount() {
-		// always zero?
 		return skipCount;
 	}
 

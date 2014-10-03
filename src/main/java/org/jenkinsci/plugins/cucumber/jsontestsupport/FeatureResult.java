@@ -223,7 +223,6 @@ public class FeatureResult extends MetaTabulatedResult {
 
 	@Override
 	public int getSkipCount() {
-		// always zero?
 		return skipCount;
 	}
 

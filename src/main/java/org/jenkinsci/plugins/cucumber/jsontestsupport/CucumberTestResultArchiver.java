@@ -95,8 +95,8 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 			action = new CucumberTestResultAction(build, result, listener);
 
-			if (result.getPassCount() == 0 && result.getFailCount() == 0)
-				throw new AbortException("No cucumber scenarious passed or failed.");
+			if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
+				throw new AbortException("No cucumber scenarios appear to have been run.");
 
 			CHECKPOINT.block();
 

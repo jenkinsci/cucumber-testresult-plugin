@@ -187,6 +187,15 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	}
 
 
+	/**
+	 * @return true if the test did not fail - this does not mean it had any successful tests however.
+	 */
+	@Override
+	public boolean isPassed() {
+		return (getFailCount() == 0);
+	}
+
+
 	@Override
 	public int getSkipCount() {
 		return skipCount;

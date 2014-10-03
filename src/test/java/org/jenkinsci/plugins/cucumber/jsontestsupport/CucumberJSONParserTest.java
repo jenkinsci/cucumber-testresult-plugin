@@ -97,6 +97,33 @@ public class CucumberJSONParserTest {
 	}
 
 	@Test
+	public void testPendingStep() throws Exception {
+		CucumberJSONParser parser = new CucumberJSONParser();
+
+		File f = getResourceAsFile("ScenarioResultTest/pending.json");
+
+		List<File> files = new ArrayList<File>();
+		files.add(f);
+
+		TaskListener mockListener = Mockito.mock(TaskListener.class);
+		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
+
+		CucumberTestResult testresult = parser.parse(files, mockListener);
+
+		assertThat("result should be pass", testresult.isPassed(), is(true));
+
+		assertThat("Correct # of passing tests", testresult.getPassCount(), is(0));
+		assertThat("Correct # of failing tests", testresult.getFailCount(), is(0));
+		assertThat("Correct # of skipped tests", testresult.getSkipCount(), is(1));
+		assertThat("Duration is correct", testresult.getDuration(), is(0.100813F));
+		assertThat("Duration string is correct", testresult.getDurationString(), is("0.1 sec"));
+		assertThat("Correct # of children", testresult.getChildren(), hasSize(1));
+		assertThat("Correct # of features", testresult.getFeatures(), hasSize(1));
+
+		// Get the individual Features and check their scenarios.
+	}
+
+	@Test
 	public void testUndefinedStep() throws Exception {
 		CucumberJSONParser parser = new CucumberJSONParser();
 

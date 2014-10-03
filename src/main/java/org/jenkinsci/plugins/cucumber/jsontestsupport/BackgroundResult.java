@@ -49,6 +49,8 @@ public class BackgroundResult extends TestResult {
 	/* Recomputed by a call to {@link CucumberTestResult#tally()} */
 	// true if this test failed
 	private transient boolean failed;
+	private transient boolean skipped;
+	
 	private transient float duration;
 	
 	BackgroundResult(Background background) {
@@ -79,12 +81,12 @@ public class BackgroundResult extends TestResult {
 
 	@Override
 	public int getSkipCount() {
-		return 0;
+		return skipped ? 1 : 0;
 	}
 
 	@Override
 	public int getPassCount() {
-		return failed ? 0 : 1;
+		return (failed || skipped) ? 0 : 1;
 	}
 
 	
@@ -135,6 +137,11 @@ public class BackgroundResult extends TestResult {
 			sr.tally();
 			if (sr.getFailCount() != 0) {
 				failed = true;
+				skipped = false;
+			}
+			else if (sr.getSkipCount() != 0) {
+				failed = false;
+				skipped = true;
 			}
 			duration += sr.getDuration();
 		}

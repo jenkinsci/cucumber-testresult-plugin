@@ -67,6 +67,8 @@ public class ScenarioResult extends TestResult {
 
 	// true if this test failed
 	private transient boolean failed;
+	private transient boolean skipped;
+	
 	private transient float duration;
 
    /**
@@ -121,14 +123,15 @@ public class ScenarioResult extends TestResult {
 	
 	@Override
 	public int getSkipCount() {
-		return 0;
+		return (skipped ? 1 : 0);
 	}
 
 
 	@Override
 	@Exported(visibility=9)
 	public int getPassCount() {
-		return (failed ? 0 : 1);
+		// we are passed if we are not skipped and not failed.
+		return (skipped || failed) ? 0 : 1;
 	}
 
 
@@ -230,7 +233,7 @@ public class ScenarioResult extends TestResult {
 	// stapler strips the trailing 's'
 	public Status getStatus() {
 		if (getSkipCount() > 0) {
-			// cucumber doesn't report skipped scenarios
+			// treat pending as skipped (undefined are errors).
 			return Status.SKIPPED;
 		}
 		ScenarioResult psr = (ScenarioResult) getPreviousResult();
@@ -295,6 +298,9 @@ public class ScenarioResult extends TestResult {
 			if (sr.getFailCount() != 0) {
 				failed = true;
 			}
+			if (sr.getSkipCount() != 0) {
+				skipped = true;
+			}
 		}
 		
 		if (backgroundResult != null) {
@@ -303,11 +309,17 @@ public class ScenarioResult extends TestResult {
 			if (backgroundResult.getFailCount() != 0) {
 				failed = true;
 			}
+			if (backgroundResult.getSkipCount() != 0) {
+				skipped = true;
+			}
 		}
 		for (BeforeAfterResult bar : beforeResults) {
 			duration += bar.getDuration();
 			if (bar.getFailCount() != 0) {
 				failed = true;
+			}
+			if (bar.getSkipCount() != 0) {
+				skipped = true;
 			}
 		}
 		for (BeforeAfterResult bar : afterResults) {
@@ -315,6 +327,13 @@ public class ScenarioResult extends TestResult {
 			if (bar.getFailCount() != 0) {
 				failed = true;
 			}
+			if (bar.getSkipCount() != 0) {
+				skipped = true;
+			}
+		}
+		// we can't be both skipped and failed - so failed takes precedence
+		if (failed) {
+			skipped = false;
 		}
 	}
 

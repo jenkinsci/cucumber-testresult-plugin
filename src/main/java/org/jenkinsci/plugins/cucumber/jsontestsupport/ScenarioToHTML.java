@@ -52,7 +52,7 @@ public class ScenarioToHTML {
 		/** line does not have a result */
 		NO_RESULT(""),
 		/** glue code is not implemented */
-		PENDING("background-color: #ffeeee;");
+		PENDING("background-color: #ffffcc;");
 
 		public final String css;
 

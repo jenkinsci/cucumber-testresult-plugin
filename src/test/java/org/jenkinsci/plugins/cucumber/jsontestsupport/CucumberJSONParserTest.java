@@ -88,8 +88,8 @@ public class CucumberJSONParserTest {
 		assertThat("Correct # of passing tests", testresult.getPassCount(), is(7));
 		assertThat("Correct # of failing tests", testresult.getFailCount(), is(1));
 		assertThat("Correct # of skipped tests", testresult.getSkipCount(), is(0));
-		assertThat("Duration is correct", testresult.getDuration(), is(0.12737842F));
-		assertThat("Duration string is correct", testresult.getDurationString(), is("0.12 sec"));
+		assertThat("Duration is correct", testresult.getDuration(), is(0.33427134F));
+		assertThat("Duration string is correct", testresult.getDurationString(), is("0.33 sec"));
 		assertThat("Correct # of children", testresult.getChildren(), hasSize(3));
 		assertThat("Correct # of features", testresult.getFeatures(), hasSize(3));
 
@@ -149,7 +149,9 @@ public class CucumberJSONParserTest {
 
 		// Get the individual Features and check their scenarios.
 	}
-	
+
+
+
 	private static File getResourceAsFile(String resource) throws Exception {
 		URL url = CucumberJSONParserTest.class.getResource(resource);
 		Assert.assertNotNull("Resource " + resource + " could not be found", url);

@@ -132,16 +132,21 @@ public class BackgroundResult extends TestResult {
 	@Override
 	public void tally() {
 		duration = 0.0f;
-
+		failed = false;
+		skipped = false;
+		
 		for (StepResult sr : stepResults) {
 			sr.tally();
-			if (sr.getFailCount() != 0) {
-				failed = true;
-				skipped = false;
-			}
-			else if (sr.getSkipCount() != 0) {
-				failed = false;
-				skipped = true;
+			if (!failed) {
+				// only change the flags if we haven't had a failure
+				if (sr.getFailCount() != 0) {
+					failed = true;
+					skipped = false;
+				}
+				else if (sr.getSkipCount() != 0) {
+					failed = false;
+					skipped = true;
+				}
 			}
 			duration += sr.getDuration();
 		}

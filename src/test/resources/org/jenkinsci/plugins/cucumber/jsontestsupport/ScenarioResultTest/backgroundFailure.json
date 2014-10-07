@@ -21,14 +21,38 @@
           {
             "result": {
               "duration": 103446466,
-              "status": "failed",
-              "error_message": "java.lang.reflect.InvocationTargetException"
+              "status": "passed"
             },
             "name": "a calculator I just turned on",
             "keyword": "Given ",
             "line": 5,
             "match": {
               "location": "RpnCalculatorStepdefs.a_calculator_I_just_turned_on()"
+            }
+          },
+          {
+            "result": {
+              "duration": 103446466,
+              "status": "failed",
+              "error_message": "java.lang.reflect.InvocationTargetException"
+            },
+            "name": "I want to fail this step",
+            "keyword": "Given ",
+            "line": 6,
+            "match": {
+              "location": "RpnCalculatorStepdefs.i_want_to_fail_this_step()"
+            }
+          },
+          {
+            "result": {
+              "duration": 103446466,
+              "status": "skipped"
+            },
+            "name": "some step that is skipped",
+            "keyword": "Given ",
+            "line": 5,
+            "match": {
+              "location": "RpnCalculatorStepdefs.a_method()"
             }
           }
         ],

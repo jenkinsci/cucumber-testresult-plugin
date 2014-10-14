@@ -76,7 +76,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 			}
 		}
 		catch (CucumberModelException ccm) {
-			throw new IOException("Failed to parse Cucumber JSON", ccm);
+			throw new AbortException("Failed to parse Cucumber JSON: " + ccm.getMessage());
 		}
 		finally {
 			// even though this is a noop prevent an eclipse warning.

@@ -98,8 +98,8 @@ class GherkinCallback implements Formatter, Reporter {
 	public void background(Background background) {
 		logger.fine("Background: " + background.getName());
 		if (currentBackground != null) {
-			logger.severe("Background received before previous background handled");
-			throw new CucumberModelException("Background received before previous background handled");
+			logger.severe("Background: " + background.getName() + " received before previous background: " + currentBackground.getName()+ " handled");
+			throw new CucumberModelException("Background: " + background.getName() + " received before previous background: " + currentBackground.getName()+ " handled");
 		}
 		currentBackground = new BackgroundResult(background);
 	}
@@ -152,8 +152,11 @@ class GherkinCallback implements Formatter, Reporter {
 			// logger.fine("      " + step.getStackTraceElement());
 		}
 		if (currentStep != null) {
-			logger.severe("Step received before previous step handled!");
-			throw new CucumberModelException("Step received before previous step handled!");
+			logger.severe("Step: " + step.getKeyword() + " " + step.getName() + "received before previous step " +
+					step.getKeyword()+ " " +step.getName()+ " handled! Maybe caused by broken JSON, see #JENKINS-21835");
+			throw new CucumberModelException("Step: " + step.getKeyword() + " " + step.getName() +
+					"received before previous step " + step.getKeyword() + " " + step.getName() +
+					" handled! Maybe caused by broken JSON, see #JENKINS-21835");
 		}
 		currentStep = step;
 	}
@@ -243,8 +246,10 @@ class GherkinCallback implements Formatter, Reporter {
 		// applies to a step.
 		logger.fine("rep  match: " + match.getLocation());
 		if (currentMatch != null) {
-			logger.severe("Match received before previous Match handled");
-			throw new CucumberModelException("Match received before previous Match handled");
+			logger.severe("Match: " + match.getLocation() + " received before previous Match: " +
+					currentMatch.getLocation()+ "handled");
+			throw new CucumberModelException("Match: " + match.getLocation() + " received before previous Match: " +
+					currentMatch.getLocation()+ "handled");
 		}
 		currentMatch = match;
 	}

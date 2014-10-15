@@ -137,8 +137,11 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		build.getActions().add(action);
 		CHECKPOINT.report();
 
-		if (action.getResult().getFailCount() > 0)
+		if (action.getResult().getTotalCount() == action.getResult().getFailCount()){
+			build.setResult(Result.FAILURE);
+		} else if (action.getResult().getFailCount() > 0) {
 			build.setResult(Result.UNSTABLE);
+		}
 
 		return true;
 	}

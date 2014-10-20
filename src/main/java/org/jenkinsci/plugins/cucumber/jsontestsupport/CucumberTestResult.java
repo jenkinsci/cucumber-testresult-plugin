@@ -326,4 +326,8 @@ public class CucumberTestResult extends MetaTabulatedResult {
 		}
 	}
 
+	@Override
+	public String getDescription() {
+		return "Cucumber Test Results";
+	}
 }

@@ -60,6 +60,9 @@ public class ScenarioResult extends TestResult {
 	/** Possibly empty list of code executed before the Scenario. */
 	private List<BeforeAfterResult> afterResults = new ArrayList<BeforeAfterResult>();
 
+	/** Possibly empty list of embedded items for the Scenario. */
+	private List<EmbeddedItem> embeddedItems = new ArrayList<EmbeddedItem>();
+
 	private FeatureResult parent;
 	
 	private transient AbstractBuild<?, ?> owner;
@@ -207,6 +210,15 @@ public class ScenarioResult extends TestResult {
 
 	void addBeforeResult(BeforeAfterResult beforeResult) {
 		beforeResults.add(beforeResult);
+	}
+
+
+	public List<EmbeddedItem> getEmbeddedItems() {
+		return embeddedItems;
+	}
+
+	void addEmbeddedItem(EmbeddedItem item) {
+		embeddedItems.add(item);
 	}
 
 

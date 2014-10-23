@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2013, Cisco Systems, Inc., a California corporation
+ * Copyright (c) 2014, Cisco Systems, Inc., a California corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,16 +24,22 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 /**
- * An exception caused by failing to parse the Cucumber JSON file. Most likely caused by a bug in the code
- * with some strange/unseen JSON output.
- * 
+ * An EmbeddedItem represents an item that has been embedded in a test report.
+ * The actual copying of the item from the JSON (parsed on the slave) to the master happens in 
+ * {@linnk CucumberJSONParser.parse(String, AbstractBuild, Launcher, TaskListener)}
  * @author James Nord
+ *
  */
-public class CucumberModelException extends RuntimeException {
+public class EmbeddedItem {
 
-	public CucumberModelException(String message) {
-		super(message);
-	}
+	/** The mimetype of the object */
+	private String mimetype;
 	
-
+	/** The name if the embedded file on disk */
+	private String filename;
+	
+	public EmbeddedItem(String mimetype, String filename) {
+		this.mimetype = mimetype;
+		this.filename = filename;
+	}
 }

@@ -90,9 +90,19 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		try {
 			CucumberJSONParser parser = new CucumberJSONParser();
 
-			CucumberTestResult result =
-			      (CucumberTestResult) parser.parse(_testResults, build, launcher, listener);
+			CucumberTestResult result = parser.parse(_testResults, build, launcher, listener);
 
+			// TODO - look at all of the Scenarious and see if there are any embedded items contained with in them
+			// if so we need to copy them to the master.
+			for (FeatureResult f : result.getFeatures()) {
+				for (ScenarioResult s : f.getScenarioResults()) {
+					for (EmbeddedItem item : s.getEmbeddedItems()) {
+						// this is the wrong place to do the copying...
+						// we need a new callable to grab/copy all of the files (in a single go?)
+					}
+				}
+			}
+			
 			action = new CucumberTestResultAction(build, result, listener);
 
 			if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)

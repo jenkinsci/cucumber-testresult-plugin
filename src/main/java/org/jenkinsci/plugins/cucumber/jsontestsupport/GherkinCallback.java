@@ -35,6 +35,8 @@ import gherkin.formatter.model.ScenarioOutline;
 import gherkin.formatter.model.Step;
 import gherkin.formatter.model.Tag;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -44,7 +46,7 @@ import java.util.List;
  */
 class GherkinCallback implements Formatter, Reporter {
 
-	private boolean debug = false;
+	private boolean debug = true;
 	
 	private FeatureResult currentFeatureResult = null;
 	private ScenarioResult currentScenarioResult = null;
@@ -267,6 +269,14 @@ class GherkinCallback implements Formatter, Reporter {
 
 	public void embedding(String mimeType, byte[] data) {
 		if (debug) {System.out.println("rep  embedding: " + mimeType);}
+		try {
+			File f = CucumberUtils.createEmbedFile(data);
+			EmbeddedItem embed = new EmbeddedItem(mimeType, f.getName());
+			currentScenarioResult.addEmbeddedItem(embed);
+		}
+		catch (IOException ex) {
+			throw new CucumberPluginException("Failed to write embedded data to temporary file", ex);
+		}
 	}
 
 

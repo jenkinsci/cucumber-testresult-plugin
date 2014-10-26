@@ -55,26 +55,6 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 		return "Cucumber JSON parser";
 	}
 
-   /**
-    * This method is executed on the slave that has the report files to parse test reports and builds {@link TestResult}.
-    *
-    * @param reportFiles
-    *      List of files to be parsed. Never be empty nor null.
-    * @param launcher
-    *      Can be used to fork processes on the machine where the build is running. Never null.
-    * @param listener
-    *      Use this to report progress and other problems. Never null.
-    *
-    * @throws InterruptedException
-    *      If the user cancels the build, it will be received as a thread interruption. Do not catch
-    *      it, and instead just forward that through the call stack.
-    * @throws IOException
-    *      If you don't care about handling exceptions gracefully, you can just throw IOException
-    *      and let the default exception handling in Hudson takes care of it.
-    * @throws AbortException
-    *      If you encounter an error that you handled gracefully, throw this exception and Hudson
-    *      will not show a stack trace.
-    */
 	@Override
    protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
 		

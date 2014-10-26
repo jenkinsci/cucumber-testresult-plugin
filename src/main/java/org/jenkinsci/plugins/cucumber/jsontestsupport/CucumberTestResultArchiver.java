@@ -48,6 +48,7 @@ import hudson.util.FormValidation;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
 
@@ -56,6 +57,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Generates HTML report from Cucumber JSON files.
@@ -64,18 +66,33 @@ import org.kohsuke.stapler.StaplerRequest;
  * @author Kohsuke Kawaguchi (original JUnit code)
  */
 public class CucumberTestResultArchiver extends Recorder implements MatrixAggregatable {
+	private static final Logger LOGGER = Logger.getLogger(CucumberTestResultArchiver.class.getName());
 
 	/**
 	 * {@link FileSet} "includes" string, like "foo/bar/*.xml"
 	 */
 	private final String testResults;
 
+	private boolean ignoreBadSteps;
 
 	@DataBoundConstructor
 	public CucumberTestResultArchiver(String testResults) {
 		this.testResults = testResults;
 	}
 
+	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps){
+		this(testResults);
+		setIgnoreBadSteps(ignoreBadSteps);
+	}
+
+	@DataBoundSetter
+	public void setIgnoreBadSteps(boolean ignoreBadSteps){
+		this.ignoreBadSteps = ignoreBadSteps;
+	}
+
+	public boolean getIgnoreBadSteps(){
+		return ignoreBadSteps;
+	}
 
 	@Override
 	public boolean
@@ -88,7 +105,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		final String _testResults = build.getEnvironment(listener).expand(this.testResults);
 
 		try {
-			CucumberJSONParser parser = new CucumberJSONParser();
+			CucumberJSONParser parser = new CucumberJSONParser(ignoreBadSteps);
 
 			CucumberTestResult result =
 			      (CucumberTestResult) parser.parse(_testResults, build, launcher, listener);
@@ -182,7 +199,9 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		public Publisher
 		      newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
 			String testResults = formData.getString("testResults");
-			return new CucumberTestResultArchiver(testResults);
+			boolean ignoreBadSteps = formData.getBoolean("ignoreBadSteps");
+			LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
+			return new CucumberTestResultArchiver(testResults, ignoreBadSteps);
 		}
 
 
@@ -199,4 +218,5 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			return true;
 		}
 	}
+
 }

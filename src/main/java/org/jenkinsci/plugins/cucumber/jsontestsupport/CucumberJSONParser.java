@@ -29,7 +29,6 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
-import hudson.tasks.test.TestResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,10 +44,14 @@ import org.apache.commons.io.FileUtils;
 public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
 	private static final long serialVersionUID = -296964473181541824L;
+	private boolean ignoreBadSteps;
 
 	public CucumberJSONParser() {
 	}
 
+	public CucumberJSONParser(boolean ignoreBadSteps){
+		this.ignoreBadSteps = ignoreBadSteps;
+	}
 
 	@Override
 	public String getDisplayName() {
@@ -59,7 +62,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
    protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
 		
 		CucumberTestResult result = new CucumberTestResult();
-		GherkinCallback callback = new GherkinCallback(result);
+		GherkinCallback callback = new GherkinCallback(result, listener, ignoreBadSteps);
 		listener.getLogger().println("[Cucumber Tests] Parsing results.");
 		JSONParser jsonParser = new JSONParser(callback, callback);
 		

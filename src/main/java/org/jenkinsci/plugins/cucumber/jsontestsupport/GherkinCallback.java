@@ -34,6 +34,7 @@ import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.ScenarioOutline;
 import gherkin.formatter.model.Step;
 import gherkin.formatter.model.Tag;
+import hudson.model.TaskListener;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -47,7 +48,9 @@ import java.util.logging.Logger;
 class GherkinCallback implements Formatter, Reporter {
 
 	private static final Logger logger = Logger.getLogger(GherkinCallback.class.getName());
-	
+	private boolean ignoreBadSteps = false;
+	private TaskListener listener = null;
+
 	private FeatureResult currentFeatureResult = null;
 	private ScenarioResult currentScenarioResult = null;
 	private BackgroundResult currentBackground = null;
@@ -64,6 +67,12 @@ class GherkinCallback implements Formatter, Reporter {
 		this.testResult = testResult;
 	}
 
+
+	GherkinCallback(CucumberTestResult testResult, TaskListener listener, boolean ignoreBadSteps){
+		this(testResult);
+		this.listener = listener;
+		this.ignoreBadSteps = ignoreBadSteps;
+	}
 
 	// Formatter implementation
 
@@ -98,8 +107,8 @@ class GherkinCallback implements Formatter, Reporter {
 	public void background(Background background) {
 		logger.fine("Background: " + background.getName());
 		if (currentBackground != null) {
-			logger.severe("Background: " + background.getName() + " received before previous background: " + currentBackground.getName()+ " handled");
-			throw new CucumberModelException("Background: " + background.getName() + " received before previous background: " + currentBackground.getName()+ " handled");
+			logger.severe("Background: {" + background.getName() + "} received before previous background: {" + currentBackground.getName()+ "} handled");
+			throw new CucumberModelException("Background: {" + background.getName() + "} received before previous background: {" + currentBackground.getName()+ "} handled");
 		}
 		currentBackground = new BackgroundResult(background);
 	}
@@ -152,11 +161,14 @@ class GherkinCallback implements Formatter, Reporter {
 			// logger.fine("      " + step.getStackTraceElement());
 		}
 		if (currentStep != null) {
-			logger.severe("Step: " + step.getKeyword() + " " + step.getName() + "received before previous step " +
-					step.getKeyword()+ " " +step.getName()+ " handled! Maybe caused by broken JSON, see #JENKINS-21835");
-			throw new CucumberModelException("Step: " + step.getKeyword() + " " + step.getName() +
-					"received before previous step " + step.getKeyword() + " " + step.getName() +
-					" handled! Maybe caused by broken JSON, see #JENKINS-21835");
+			String error = "Step: {" + step.getKeyword() + "} name: {" + step.getName() +
+					"} received before previous step: {" + step.getKeyword() + "} name: {" + step.getName() +
+					"} handled! Maybe caused by broken JSON, see #JENKINS-21835";
+			listener.error(error);
+			logger.severe(error);
+			if (!ignoreBadSteps) {
+				throw new CucumberModelException(error);
+			}
 		}
 		currentStep = step;
 	}

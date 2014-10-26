@@ -188,13 +188,6 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			return "Publish Cucumber test result report";
 		}
 
-
-		@Override
-		public String getHelpFile() {
-			return "/help/tasks/cucumber/report.html";
-		}
-
-
 		@Override
 		public Publisher
 		      newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {

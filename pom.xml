@@ -27,11 +27,8 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<!-- 1.535-SNAPSHOT -->
-		<version>1.509</version>
-		<!-- <version>1.509</version> -->
-		<!-- <version>1.535-SNAPSHOT</version> -->
 		<relativePath />
+		<version>1.536</version>
 	</parent>
 
 	<groupId>org.jenkins-ci.plugins</groupId>

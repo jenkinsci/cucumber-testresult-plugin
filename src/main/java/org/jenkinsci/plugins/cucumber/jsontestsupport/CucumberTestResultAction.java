@@ -141,6 +141,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 	
 
 	@Override
+	@Exported(visibility = 5)
 	public synchronized CucumberTestResult getResult() {
 		CucumberTestResult r;
 		if (result == null) {

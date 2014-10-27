@@ -80,12 +80,6 @@ public class FeatureResult extends MetaTabulatedResult {
 	}
 	
 
-	// JENKINS-25280
-	// XXX should be removed in the future when we move past 1.587
-	public String getFullDisplayName() {
-		return getDisplayName();
-	}
-
 	public String getDisplayName() {
 		return getName();
 	}

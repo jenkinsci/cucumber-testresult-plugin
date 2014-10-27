@@ -27,10 +27,8 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<!-- 1.535-SNAPSHOT -->
-		<version>1.509</version>
-		<!-- <version>1.509</version> -->
-		<!-- <version>1.535-SNAPSHOT</version> -->
+		<!-- lowest LTS that has fixes we require. -->
+		<version>1.580</version>
 		<relativePath />
 	</parent>
 
@@ -74,6 +72,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>junit</artifactId>
+			<version>1.2-beta-3</version>
+			<type>hpi</type>
+		</dependency>
+		<dependency>
 			<groupId>info.cukes</groupId>
 			<artifactId>gherkin</artifactId>
 			<version>2.12.2</version>
@@ -107,21 +111,9 @@
 	<build>
 		<plugins>
 				<plugin>
-						<!-- until the fix for JENKINS-18918 is available in a backported 
-								skip any apache-maven-xxx folders in classes -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<version>2.4</version>
-						<configuration>
-								<excludes>
-										<exclude>**/apache-maven-*/*</exclude>
-								</excludes>
-						</configuration>
-				</plugin>
-				<plugin>
 						<groupId>org.jenkins-ci.tools</groupId>
 						<artifactId>maven-hpi-plugin</artifactId>
-						<version>1.96</version>
+						<version>1.106</version>
 						<extensions>true</extensions>
 				</plugin>
 		</plugins>

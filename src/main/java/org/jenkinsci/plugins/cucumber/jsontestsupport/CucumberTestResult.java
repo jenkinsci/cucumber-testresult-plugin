@@ -87,7 +87,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	/**
 	 * Add a FeatureResult to this TestResult
 	 * 
-	 * @param featureResult the result of the feature to add.
+	 * @param result the result of the feature to add.
 	 */
 	void addFeatureResult(FeatureResult result) {
 		featureResults.add(result);
@@ -326,4 +326,8 @@ public class CucumberTestResult extends MetaTabulatedResult {
 		}
 	}
 
+	@Override
+	public String getDescription() {
+		return "Cucumber Test Results";
+	}
 }

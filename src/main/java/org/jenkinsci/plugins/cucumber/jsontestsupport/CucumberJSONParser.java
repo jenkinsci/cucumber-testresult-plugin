@@ -29,7 +29,6 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
-import hudson.tasks.test.TestResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,41 +44,25 @@ import org.apache.commons.io.FileUtils;
 public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
 	private static final long serialVersionUID = -296964473181541824L;
+	private boolean ignoreBadSteps;
 
 	public CucumberJSONParser() {
 	}
 
+	public CucumberJSONParser(boolean ignoreBadSteps){
+		this.ignoreBadSteps = ignoreBadSteps;
+	}
 
 	@Override
 	public String getDisplayName() {
 		return "Cucumber JSON parser";
 	}
 
-   /**
-    * This method is executed on the slave that has the report files to parse test reports and builds {@link TestResult}.
-    *
-    * @param reportFiles
-    *      List of files to be parsed. Never be empty nor null.
-    * @param launcher
-    *      Can be used to fork processes on the machine where the build is running. Never null.
-    * @param listener
-    *      Use this to report progress and other problems. Never null.
-    *
-    * @throws InterruptedException
-    *      If the user cancels the build, it will be received as a thread interruption. Do not catch
-    *      it, and instead just forward that through the call stack.
-    * @throws IOException
-    *      If you don't care about handling exceptions gracefully, you can just throw IOException
-    *      and let the default exception handling in Hudson takes care of it.
-    * @throws AbortException
-    *      If you encounter an error that you handled gracefully, throw this exception and Hudson
-    *      will not show a stack trace.
-    */
 	@Override
    protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
 		
 		CucumberTestResult result = new CucumberTestResult();
-		GherkinCallback callback = new GherkinCallback(result);
+		GherkinCallback callback = new GherkinCallback(result, listener, ignoreBadSteps);
 		listener.getLogger().println("[Cucumber Tests] Parsing results.");
 		JSONParser jsonParser = new JSONParser(callback, callback);
 		
@@ -96,7 +79,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 			}
 		}
 		catch (CucumberModelException ccm) {
-			throw new IOException("Failed to parse Cucumber JSON", ccm);
+			throw new AbortException("Failed to parse Cucumber JSON: " + ccm.getMessage());
 		}
 		finally {
 			// even though this is a noop prevent an eclipse warning.

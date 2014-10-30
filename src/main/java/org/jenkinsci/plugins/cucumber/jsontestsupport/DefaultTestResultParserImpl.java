@@ -81,8 +81,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 	 *            Hudson will not show a stack trace.
 	 */
 	protected abstract TestResult
-	      parse(List<File> reportFiles, TaskListener listener) throws InterruptedException,
-	                                                                             IOException;
+	      parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException;
 
 
 	@Override

@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  */
 class GherkinCallback implements Formatter, Reporter {
 
-	private static final Logger logger = Logger.getLogger(GherkinCallback.class.getName());
+	private static final Logger LOG = Logger.getLogger(GherkinCallback.class.getName());
 	private boolean ignoreBadSteps = false;
 	private TaskListener listener = null;
 
@@ -78,9 +78,9 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// called before a feature to identify the feature
 	public void uri(String uri) {
-		logger.fine("URI: " + uri);
+		LOG.log(Level.FINE, "URI: {}", uri);
 		if (currentURI != null) {
-			logger.severe("URI received before previous uri handled");
+			LOG.log(Level.SEVERE, "URI received before previous uri handled");
 			throw new CucumberModelException("URI received before previous uri handled");
 		}
 		currentURI = uri;
@@ -88,13 +88,13 @@ class GherkinCallback implements Formatter, Reporter {
 
 
 	public void feature(Feature feature) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("Feature: " + feature.getKeyword() + feature.getName());
+		if (LOG.isLoggable(Level.FINE)) {
+			LOG.log(Level.FINE, "Feature: " + feature.getKeyword() + feature.getName());
 			List<Tag> tags = feature.getTags();
 			for (Tag tag : tags) {
-				logger.fine("         " + tag.getName());
+				LOG.log(Level.FINE, "         " + tag.getName());
 			}
-			logger.fine("         " + feature.getDescription());
+			LOG.log(Level.FINE, "         " + feature.getDescription());
 		}
 		// a new feature being received signals the end of the previous feature
 		currentFeatureResult = new FeatureResult(currentURI, feature);
@@ -105,9 +105,9 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// applies to a scenario
 	public void background(Background background) {
-		logger.fine("Background: " + background.getName());
+		LOG.log(Level.FINE, "Background: {}", background.getName());
 		if (currentBackground != null) {
-			logger.severe("Background: {" + background.getName() + "} received before previous background: {" + currentBackground.getName()+ "} handled");
+			LOG.log(Level.SEVERE, "Background: {" + background.getName() + "} received before previous background: {" + currentBackground.getName()+ "} handled");
 			throw new CucumberModelException("Background: {" + background.getName() + "} received before previous background: {" + currentBackground.getName()+ "} handled");
 		}
 		currentBackground = new BackgroundResult(background);
@@ -115,14 +115,14 @@ class GherkinCallback implements Formatter, Reporter {
 
 
 	public void scenario(Scenario scenario) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("Scenario: " + scenario.getKeyword() + " " + scenario.getName());
+		if (LOG.isLoggable(Level.FINE)) {
+			LOG.log(Level.FINE, "Scenario: " + scenario.getKeyword() + " " + scenario.getName());
 			List<Tag> tags = scenario.getTags();
 			for (Tag tag : tags) {
-				logger.fine("         " + tag.getName());
+				LOG.log(Level.FINE, "         " + tag.getName());
 			}
-			logger.fine("          " + scenario.getDescription());
-			logger.fine("          " + scenario.getComments());
+			LOG.log(Level.FINE, "          " + scenario.getDescription());
+			LOG.log(Level.FINE, "          " + scenario.getComments());
 		}
 		// a new scenario signifies that the previous scenario has been handled.
 		currentScenarioResult = new ScenarioResult(scenario, currentBackground);
@@ -133,31 +133,31 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// appears to not be called.
 	public void scenarioOutline(ScenarioOutline scenarioOutline) {
-		logger.fine("ScenarioOutline: " + scenarioOutline.getName());
+		LOG.log(Level.FINE, "ScenarioOutline: {}", scenarioOutline.getName());
 	}
 
 
 	// appears to not be called.
 	public void examples(Examples examples) {
 		// not stored in the json - used in the Gherkin only
-		logger.fine("Examples: " + examples.getName());
+		LOG.log(Level.FINE, "Examples: {}", examples.getName());
 	}
 
 	// appears to not be called.
 	 public void startOfScenarioLifeCycle(Scenario scenario) {
-		 logger.fine("startOfScenarioLifeCycle: " + scenario.getName());
+		 LOG.log(Level.FINE, "startOfScenarioLifeCycle: {}", scenario.getName());
 	}
 
 	// appears to not be called.
 	public void endOfScenarioLifeCycle(Scenario scenario) {
-		logger.fine("endOfScenarioLifeCycle: " + scenario.getName());
+		LOG.log(Level.FINE, "endOfScenarioLifeCycle: {}", scenario.getName());
 	}
 
 	// A step has been called - could be in a background or a Scenario
 	public void step(Step step) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("Step: " + step.getKeyword() + " " + step.getName());
-			logger.fine("      " + step.getRows());
+		if (LOG.isLoggable(Level.FINE)) {
+			LOG.log(Level.FINE, "Step: " + step.getKeyword() + " " + step.getName());
+			LOG.log(Level.FINE, "      " + step.getRows());
 			// logger.fine("      " + step.getStackTraceElement());
 		}
 		if (currentStep != null) {
@@ -165,7 +165,7 @@ class GherkinCallback implements Formatter, Reporter {
 					"} received before previous step: {" + step.getKeyword() + "} name: {" + step.getName() +
 					"} handled! Maybe caused by broken JSON, see #JENKINS-21835";
 			listener.error(error);
-			logger.severe(error);
+			LOG.log(Level.SEVERE, error);
 			if (!ignoreBadSteps) {
 				throw new CucumberModelException(error);
 			}
@@ -175,7 +175,7 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// marks the end of a feature
 	public void eof() {
-		logger.fine("eof");
+		LOG.log(Level.FINE, "eof");
 		currentFeatureResult = null;
 		currentScenarioResult = null;
 		currentBackground = null;
@@ -185,7 +185,7 @@ class GherkinCallback implements Formatter, Reporter {
 
 
 	public void syntaxError(String state, String event, List<String> legalEvents, String uri, Integer line) {
-		logger.severe("syntaxError: ");
+		LOG.log(Level.SEVERE, "syntaxError: - Failed to parse Gherkin json file.");
 		StringBuilder sb = new StringBuilder("Failed to parse Gherkin json file.");
 		sb.append("\tline: ").append(line);
 		sb.append("\turi: ").append(uri);
@@ -196,12 +196,12 @@ class GherkinCallback implements Formatter, Reporter {
 
 	public void done() {
 		// appears to not be called?
-		logger.fine("done");
+		LOG.log(Level.FINE, "done");
 	}
 
 	public void close() {
 		// appears to not be called?
-		logger.fine("close:");
+		LOG.log(Level.FINE, "close");
 	}
 
 
@@ -209,12 +209,12 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// applies to a scenario - any code that is tagged as @Before
 	public void before(Match match, Result result) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("rep  before match: " + match.getLocation());
-			logger.fine("rep        result : " + "(passed) " + Result.PASSED.equals(result.getStatus()));
-			logger.fine("rep        result : " + result.getDuration());
-			logger.fine("rep        result : " + result.getErrorMessage());
-			logger.fine("rep        result : " + result.getError());
+		if (LOG.isLoggable(Level.FINE)) {
+			LOG.log(Level.FINE, "rep  before match: " + match.getLocation());
+			LOG.log(Level.FINE, "rep        result : " + "(passed) " + Result.PASSED.equals(result.getStatus()));
+			LOG.log(Level.FINE, "rep        result : " + result.getDuration());
+			LOG.log(Level.FINE, "rep        result : " + result.getErrorMessage());
+			LOG.log(Level.FINE, "rep        result : " + result.getError());
 		}
 		currentScenarioResult.addBeforeResult(new BeforeAfterResult(match, result));
 	}
@@ -222,11 +222,11 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// applies to a step, may be in a scenario or a background
 	public void result(Result result) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("rep  result: " + "(passed) " + Result.PASSED.equals(result.getStatus()));
-			logger.fine("rep          " + result.getDuration());
-			logger.fine("rep          " + result.getErrorMessage());
-			logger.fine("rep          " + result.getError());
+		if (LOG.isLoggable(Level.FINE)) {
+			LOG.log(Level.FINE, "rep  result: " + "(passed) " + Result.PASSED.equals(result.getStatus()));
+			LOG.log(Level.FINE, "rep          " + result.getDuration());
+			LOG.log(Level.FINE, "rep          " + result.getErrorMessage());
+			LOG.log(Level.FINE, "rep          " + result.getError());
 		}
 		StepResult stepResult = new StepResult(currentStep, currentMatch, result);
 		if (currentBackground != null) {
@@ -242,12 +242,12 @@ class GherkinCallback implements Formatter, Reporter {
 
 	// applies to a scenario - any code that is tagged as @After
 	public void after(Match match, Result result) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine("rep  after match  : " + match.getLocation());
-			logger.fine("rep        result : " + "(passed) " + Result.PASSED.equals(result.getStatus()));
-			logger.fine("rep        result : " + result.getDuration());
-			logger.fine("rep        result : " + result.getErrorMessage());
-			logger.fine("rep        result : " + result.getError());
+		if (LOG.isLoggable(Level.FINE)) {
+			LOG.log(Level.FINE, "rep  after match  : " + match.getLocation());
+			LOG.log(Level.FINE, "rep        result : " + "(passed) " + Result.PASSED.equals(result.getStatus()));
+			LOG.log(Level.FINE, "rep        result : " + result.getDuration());
+			LOG.log(Level.FINE, "rep        result : " + result.getErrorMessage());
+			LOG.log(Level.FINE, "rep        result : " + result.getError());
 		}
 		currentScenarioResult.addAfterResult(new BeforeAfterResult(match, result));
 	}
@@ -256,9 +256,9 @@ class GherkinCallback implements Formatter, Reporter {
 	// applies to a step
 	public void match(Match match) {
 		// applies to a step.
-		logger.fine("rep  match: " + match.getLocation());
+		LOG.log(Level.FINE, "rep  match: {}", match.getLocation());
 		if (currentMatch != null) {
-			logger.severe("Match: " + match.getLocation() + " received before previous Match: " +
+			LOG.log(Level.SEVERE, "Match: " + match.getLocation() + " received before previous Match: " +
 					currentMatch.getLocation()+ "handled");
 			throw new CucumberModelException("Match: " + match.getLocation() + " received before previous Match: " +
 					currentMatch.getLocation()+ "handled");
@@ -268,12 +268,12 @@ class GherkinCallback implements Formatter, Reporter {
 
 
 	public void embedding(String mimeType, byte[] data) {
-		logger.fine("rep  embedding: " + mimeType);
+		LOG.log(Level.FINE, "rep  embedding: {}", mimeType);
 	}
 
 
 	public void write(String text) {
-		logger.fine("rep  write: " + text);
+		LOG.log(Level.FINE, "rep  write: {}", text);
 	}
 
 }

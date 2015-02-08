@@ -37,9 +37,18 @@ public class EmbeddedItem {
 	
 	/** The name if the embedded file on disk */
 	private String filename;
-	
+
 	public EmbeddedItem(String mimetype, String filename) {
 		this.mimetype = mimetype;
 		this.filename = filename;
 	}
+
+	protected String getFilename() {
+		return filename;
+	}
+
+	protected String getMimetype() {
+		return mimetype;
+	}
+
 }

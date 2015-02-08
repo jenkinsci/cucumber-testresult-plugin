@@ -37,6 +37,7 @@ import hudson.model.CheckPoint;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.remoting.Callable;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -45,6 +46,9 @@ import hudson.tasks.test.TestResultAggregator;
 import hudson.tasks.test.TestResultProjectAction;
 import hudson.util.FormValidation;
 
+import jenkins.MasterToSlaveFileCallable;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -92,13 +96,35 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 			CucumberTestResult result = parser.parse(_testResults, build, launcher, listener);
 
-			// TODO - look at all of the Scenarious and see if there are any embedded items contained with in them
+			// TODO - look at all of the Scenarios and see if there are any embedded items contained with in them
+			String remoteTempDir = launcher.getChannel().call(new Callable<String, InterruptedException >() {
+				@Override
+				public String call() throws InterruptedException {
+					return System.getProperty("java.io.tmpdir");
+				}
+			});
+
 			// if so we need to copy them to the master.
 			for (FeatureResult f : result.getFeatures()) {
 				for (ScenarioResult s : f.getScenarioResults()) {
 					for (EmbeddedItem item : s.getEmbeddedItems()) {
 						// this is the wrong place to do the copying...
-						// we need a new callable to grab/copy all of the files (in a single go?)
+						// XXX Need to do something with MasterToSlaveCallable to makesure we are safe from evil
+						// injection
+						FilePath srcFilePath = new FilePath(launcher.getChannel(), remoteTempDir + '/' + item.getFilename());
+						// XXX when we support the workflow we will need to make sure that these files do not clash....
+						File destRoot = new File(build.getRootDir(), "/cucumber/embed/" + f.getSafeName() + '/' + s
+								.getSafeName() + '/');
+						destRoot.mkdirs();
+						File destFile = new File(destRoot, item.getFilename());
+						if (!destFile.getAbsolutePath().startsWith(destRoot.getAbsolutePath())) {
+							// someone is trying to trick us into writing abitrary files...
+							throw new IOException("Exploit attempt detected - Build attempted to write to " +
+									destFile.getAbsolutePath());
+						}
+						FilePath destFilePath = new FilePath(destFile);
+						srcFilePath.copyTo(destFilePath);
+						srcFilePath.delete();
 					}
 				}
 			}

@@ -27,10 +27,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<!-- 1.535-SNAPSHOT -->
-		<version>1.509</version>
-		<!-- <version>1.509</version> -->
-		<!-- <version>1.535-SNAPSHOT</version> -->
+		<version>1.580</version>
 		<relativePath />
 	</parent>
 
@@ -77,6 +74,23 @@
 			<groupId>info.cukes</groupId>
 			<artifactId>gherkin</artifactId>
 			<version>2.12.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>junit</artifactId>
+			<version>1.2-beta-4</version>
+		</dependency>
+		<!-- TODO remove this when we use a newer core -->
+		<dependency>
+			<groupId>org.jenkins-ci</groupId>
+			<artifactId>SECURITY-144-compat</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<!-- TODO alter the code and make this dependency optional -->
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>matrix-project</artifactId>
+			<version>1.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>

@@ -161,7 +161,8 @@ public class CucumberJSONParserTest {
 		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
 
 		CucumberTestResult testresult = parser.parse(files, mockListener);
-		
+		assertThat("Embedded items found", testresult.getFeatures().iterator().next().getChildren().iterator().next()
+		                                   .getEmbeddedItems(), hasSize(1));
 	}
 
 	private static File getResourceAsFile(String resource) throws Exception {

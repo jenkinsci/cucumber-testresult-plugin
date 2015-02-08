@@ -60,8 +60,6 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
     *
     * @param reportFiles
     *      List of files to be parsed. Never be empty nor null.
-    * @param launcher
-    *      Can be used to fork processes on the machine where the build is running. Never null.
     * @param listener
     *      Use this to report progress and other problems. Never null.
     *

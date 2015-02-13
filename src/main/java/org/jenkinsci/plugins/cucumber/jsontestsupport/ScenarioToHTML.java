@@ -111,9 +111,27 @@ public class ScenarioToHTML {
 		}
 		// end gherkin output...
 		sb.append("</tbody></table>");
+		List<EmbeddedItem> embeddedItems = scenarioResult.getEmbeddedItems();
+		if (!embeddedItems.isEmpty()) {
+			sb.append("<h2>Embedded Items</h2>\n");
+			sb.append("<ul>");
+			for (EmbeddedItem embeddedItem : embeddedItems) {
+				addEmbeddedItem(sb, embeddedItem);
+			}
+			sb.append("</ul>");
+		}
 		return sb.toString();
 	}
 
+	private StringBuilder addEmbeddedItem(StringBuilder stringBuilder, EmbeddedItem embeddedItem) {
+		stringBuilder.append("<li>");
+		stringBuilder.append("<a href=\"./embed/").append(embeddedItem.getFilename()).append("\">");
+		stringBuilder.append(embeddedItem.getFilename());
+		stringBuilder.append("</a> of type ");
+		stringBuilder.append(embeddedItem.getMimetype());
+		stringBuilder.append("</li>\n");
+		return stringBuilder;
+	}
 
 	private StringBuilder addTagStatement(StringBuilder sb, TagStatement tagStatement) {
 		for (Comment comment : tagStatement.getComments()) {

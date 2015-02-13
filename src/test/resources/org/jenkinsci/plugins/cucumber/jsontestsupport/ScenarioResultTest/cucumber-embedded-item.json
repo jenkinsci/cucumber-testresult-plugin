@@ -1,0 +1,100 @@
+[
+  {
+    "line": 1,
+    "elements": [
+      {
+        "line": 4,
+        "name": "I can connect to the database instance",
+        "description": "",
+        "id": "connectivity;i-can-connect-to-the-database-instance",
+        "after": [
+          {
+            "result": {
+              "duration": 9738454,
+              "status": "passed"
+            },
+            "match": {
+              "location": "JDBCStepDefs.embedScreenshot(Scenario)"
+            }
+          }
+        ],
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 1355975209,
+              "status": "passed"
+            },
+            "line": 5,
+            "name": "I have a server",
+            "match": {
+              "location": "JDBCStepDefs.i_have_a_server()"
+            },
+            "keyword": "Given "
+          },
+          {
+            "result": {
+              "duration": 71051,
+              "status": "passed"
+            },
+            "line": 6,
+            "name": "I have a username",
+            "match": {
+              "location": "JDBCStepDefs.i_have_a_username()"
+            },
+            "keyword": "And "
+          },
+          {
+            "result": {
+              "duration": 30789,
+              "status": "passed"
+            },
+            "line": 7,
+            "name": "I have a password",
+            "match": {
+              "location": "JDBCStepDefs.i_have_a_password()"
+            },
+            "keyword": "And "
+          },
+          {
+            "result": {
+              "duration": 87074513,
+              "status": "passed"
+            },
+            "line": 8,
+            "name": "I have registered the Oracle JDBC driver",
+            "match": {
+              "location": "JDBCStepDefs.i_register_the_Oracle_JDBC_driver()"
+            },
+            "keyword": "When "
+          },
+          {
+            "result": {
+              "duration": 28625433269,
+              "error_message": "java.lang.AssertionError: Connection failed with IO Error: The Network Adapter could not establish the connection\r\n\tat org.junit.Assert.fail(Assert.java:88)\r\n\tat com.cisco.vci.service.oracle.aat.glue.JDBCStepDefs.i_should_be_able_to_connect_via_JDBC_without_issues(JDBCStepDefs.java:97)\r\n\tat ✽.Then I should be able to connect via JDBC without issues(features/Conectivity.feature:9)\r\n",
+              "status": "failed"
+            },
+            "embeddings": [
+              {
+                "data": "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\u003d",
+                "mime_type": "image/png"
+              }
+            ],
+            "line": 9,
+            "name": "I should be able to connect via JDBC without issues",
+            "match": {
+              "location": "JDBCStepDefs.i_should_be_able_to_connect_via_JDBC_without_issues()"
+            },
+            "keyword": "Then "
+          }
+        ]
+      }
+    ],
+    "name": "Connectivity",
+    "description": "As a user I want to be able to connect to the Oracle instance via JDBC",
+    "id": "connectivity",
+    "keyword": "Feature",
+    "uri": "features/Conectivity.feature"
+  }
+]

@@ -26,6 +26,9 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 import gherkin.formatter.model.Result;
 import gherkin.formatter.model.TagStatement;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,4 +84,24 @@ public class CucumberUtils {
 		return null;
 	}
 
+
+	/**
+	 * Create a temporary file on the slave to store the embedded content
+	 * 
+	 * @throws IOException if we couldn't create a temporary file
+	 */
+	public static File createEmbedFile(byte[] data) throws IOException {
+		File f = File.createTempFile("cuke_", ".embed");
+		{
+			FileOutputStream fos = new FileOutputStream(f);
+			try {
+				fos.write(data);
+				fos.flush();
+			}
+			finally {
+				fos.close();
+			}
+		}
+		return f;
+	}
 }

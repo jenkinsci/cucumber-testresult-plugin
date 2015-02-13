@@ -59,7 +59,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 	}
 
 	@Override
-   protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
+	protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
 		
 		CucumberTestResult result = new CucumberTestResult();
 		GherkinCallback callback = new GherkinCallback(result, listener, ignoreBadSteps);

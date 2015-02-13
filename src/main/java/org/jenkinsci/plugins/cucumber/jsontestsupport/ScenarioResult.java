@@ -23,19 +23,26 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import gherkin.formatter.model.Scenario;
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.CaseResult.Status;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
+import gherkin.formatter.model.Scenario;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
+import javax.servlet.ServletException;
 
 /**
  * Represents a Scenario belonging to a Feature from Cucumber.
@@ -59,6 +66,9 @@ public class ScenarioResult extends TestResult {
 	private BackgroundResult backgroundResult = null;
 	/** Possibly empty list of code executed before the Scenario. */
 	private List<BeforeAfterResult> afterResults = new ArrayList<BeforeAfterResult>();
+
+	/** Possibly empty list of embedded items for the Scenario. */
+	private List<EmbeddedItem> embeddedItems = new ArrayList<EmbeddedItem>();
 
 	private FeatureResult parent;
 	
@@ -207,6 +217,15 @@ public class ScenarioResult extends TestResult {
 
 	void addBeforeResult(BeforeAfterResult beforeResult) {
 		beforeResults.add(beforeResult);
+	}
+
+
+	public List<EmbeddedItem> getEmbeddedItems() {
+		return embeddedItems;
+	}
+
+	void addEmbeddedItem(EmbeddedItem item) {
+		embeddedItems.add(item);
 	}
 
 
@@ -414,5 +433,46 @@ public class ScenarioResult extends TestResult {
 			return buf.toString();
 		}
 		return null;
+	}
+
+	@Override
+	public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
+		if (token.equals(getId())) {
+			return this;
+		}
+		else if (token.startsWith("embed")) {
+			// lets go fishing...
+			String rest = req.getRestOfPath();
+			if (rest.startsWith("/")) {
+				rest = rest.substring(1);
+				// there won't be many embedded items so don't map them just search...
+				// is there enough here to display the thing??
+				for (EmbeddedItem item : getEmbeddedItems()) {
+					if (item.getFilename().equals(rest)) {
+						File file = new File(getOwner().getRootDir(), "cucumber/embed/" + getParent().getSafeName() +
+								"/" +
+								getSafeName() + "/" + item.getFilename());
+						try {
+							FileInputStream fileInputStream = new FileInputStream(file);
+							rsp.serveFile(req, fileInputStream, file.lastModified(), Long.MAX_VALUE, file.length(),
+									"mime-type:" + item.getMimetype());
+							return null;
+						} catch (IOException ex) {
+							String msg = String.format("Failed to serve cucumber embedded file (%s) for in Feature " +
+											"(%s) for job (%s)",
+									item.getFilename(), this.getFullName(), this.getOwner().getFullDisplayName());
+							LOGGER.log(Level.WARNING, msg, ex);
+						} catch (ServletException ex) {
+							String msg = String.format("Failed to serve cucumber embedded file (%s) for in Feature " +
+											"(%s) for job (%s)",
+									item.getFilename(), this.getFullName(), this.getOwner().getFullDisplayName());
+							LOGGER.log(Level.WARNING, msg, ex);
+						}
+						return null;
+					}
+				}
+			}
+		}
+		return super.getDynamic(token, req, rsp);
 	}
 }

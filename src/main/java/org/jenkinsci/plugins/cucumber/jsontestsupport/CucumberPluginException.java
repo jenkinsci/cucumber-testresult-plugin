@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2013, Cisco Systems, Inc., a California corporation
+ * Copyright (c) 2014 James Nord
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,16 +24,20 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 /**
- * An exception caused by failing to parse the Cucumber JSON file. Most likely caused by a bug in the code
- * with some strange/unseen JSON output.
+ * A generic exception indicating that something bad has happened.
  * 
  * @author James Nord
  */
-public class CucumberModelException extends RuntimeException {
+public class CucumberPluginException extends RuntimeException {
 
-	public CucumberModelException(String message) {
+	private static final long serialVersionUID = 1L;
+
+	public CucumberPluginException(String message) {
 		super(message);
 	}
 	
+	public CucumberPluginException(String message, Exception cause) {
+		super(message, cause);
+	}
 
 }

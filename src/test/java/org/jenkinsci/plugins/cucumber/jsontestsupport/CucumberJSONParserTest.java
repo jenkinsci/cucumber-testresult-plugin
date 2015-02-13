@@ -30,15 +30,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static  org.hamcrest.core.Is.is;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 public class CucumberJSONParserTest {
 
@@ -150,7 +148,22 @@ public class CucumberJSONParserTest {
 		// Get the individual Features and check their scenarios.
 	}
 
+	@Test
+	public void testEmbededItem() throws Exception {
+		CucumberJSONParser parser = new CucumberJSONParser();
 
+		File f = getResourceAsFile("ScenarioResultTest/cucumber-embedded-item.json");
+
+		List<File> files = new ArrayList<File>();
+		files.add(f);
+
+		TaskListener mockListener = Mockito.mock(TaskListener.class);
+		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
+
+		CucumberTestResult testresult = parser.parse(files, mockListener);
+		assertThat("Embedded items found", testresult.getFeatures().iterator().next().getChildren().iterator().next()
+		                                   .getEmbeddedItems(), hasSize(1));
+	}
 
 	private static File getResourceAsFile(String resource) throws Exception {
 		URL url = CucumberJSONParserTest.class.getResource(resource);

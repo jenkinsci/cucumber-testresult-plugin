@@ -46,8 +46,6 @@ import hudson.tasks.test.TestResultAggregator;
 import hudson.tasks.test.TestResultProjectAction;
 import hudson.util.FormValidation;
 
-import jenkins.MasterToSlaveFileCallable;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;

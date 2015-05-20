@@ -23,6 +23,8 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import java.io.Serializable;
+
 /**
  * An EmbeddedItem represents an item that has been embedded in a test report.
  * The actual copying of the item from the JSON (parsed on the slave) to the master happens in 
@@ -30,7 +32,7 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
  * @author James Nord
  *
  */
-public class EmbeddedItem {
+public class EmbeddedItem implements Serializable {
 
 	/** The mimetype of the object */
 	private String mimetype;

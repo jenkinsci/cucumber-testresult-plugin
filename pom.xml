@@ -4,6 +4,7 @@
   ~
   ~ Copyright (c) 2014 James Nord
   ~               2013, Cisco Systems, Inc., a California corporation
+  ~               2015 CloudBees, Inc.
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +36,7 @@
 
 	<groupId>org.jenkins-ci.plugins</groupId>
 	<artifactId>cucumber-testresult-plugin</artifactId>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.8.2-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<name>Cucumber json test reporting.</name>
@@ -121,6 +122,19 @@
 				<artifactId>maven-hpi-plugin</artifactId>
 				<version>1.106</version>
 				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.18.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>

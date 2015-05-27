@@ -112,12 +112,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			CucumberTestResult result = parser.parse(_testResults, build, launcher, listener);
 
 			// TODO - look at all of the Scenarios and see if there are any embedded items contained with in them
-			String remoteTempDir = launcher.getChannel().call(new Callable<String, InterruptedException >() {
-				@Override
-				public String call() throws InterruptedException {
-					return System.getProperty("java.io.tmpdir");
-				}
-			});
+			String remoteTempDir = launcher.getChannel().call(new TmpDirCallable());
 
 			// if so we need to copy them to the master.
 			for (FeatureResult f : result.getFeatures()) {
@@ -214,6 +209,17 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	public DescriptorImpl getDescriptor() {
 		return (DescriptorImpl) super.getDescriptor();
+	}
+
+
+	/**
+	 * {@link Callable} that gets the temporary directory from the node. 
+	 */
+	private final static class TmpDirCallable implements Callable<String, InterruptedException> {
+		@Override
+		public String call() throws InterruptedException {
+			return System.getProperty("java.io.tmpdir");
+		}
 	}
 
 

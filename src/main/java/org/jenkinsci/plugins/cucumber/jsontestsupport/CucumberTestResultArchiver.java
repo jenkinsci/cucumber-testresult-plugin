@@ -48,6 +48,7 @@ import hudson.util.FormValidation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
@@ -67,7 +68,7 @@ import org.kohsuke.stapler.DataBoundSetter;
  * @author James Nord
  * @author Kohsuke Kawaguchi (original JUnit code)
  */
-public class CucumberTestResultArchiver extends Recorder implements MatrixAggregatable {
+public class CucumberTestResultArchiver extends Recorder implements MatrixAggregatable, Serializable {
 	private static final Logger LOGGER = Logger.getLogger(CucumberTestResultArchiver.class.getName());
 
 	/**

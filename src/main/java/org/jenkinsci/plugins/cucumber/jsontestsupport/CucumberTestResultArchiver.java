@@ -216,6 +216,9 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	 * {@link Callable} that gets the temporary directory from the node. 
 	 */
 	private final static class TmpDirCallable implements Callable<String, InterruptedException> {
+
+		private static final long serialVersionUID = 1;
+
 		@Override
 		public String call() throws InterruptedException {
 			return System.getProperty("java.io.tmpdir");

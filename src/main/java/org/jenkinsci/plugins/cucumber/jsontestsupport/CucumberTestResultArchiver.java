@@ -217,7 +217,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	 */
 	private final static class TmpDirCallable implements Callable<String, InterruptedException> {
 
-		private static final long serialVersionUID = 1;
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public String call() throws InterruptedException {

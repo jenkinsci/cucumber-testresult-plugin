@@ -32,6 +32,12 @@ THE SOFTWARE.
     <f:entry title="${%Ignore Bad Steps}">
         <f:checkbox field="ignoreBadSteps"/>
     </f:entry>
+    <f:entry title="${%Fail build if all scenarios failed}">
+        <f:checkbox field="failIfAll"/>
+    </f:entry>
+    <f:entry title="${%Fail build if any of scenarios failed}">
+        <f:checkbox field="failIfAny"/>
+    </f:entry>
 <!--
   see hudson\tasks\junit\JUnitResultArchiver on how to add extended features if we want to support it.
 -->

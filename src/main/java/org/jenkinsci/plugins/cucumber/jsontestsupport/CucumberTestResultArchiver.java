@@ -77,14 +77,21 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	private boolean ignoreBadSteps;
 
-	@DataBoundConstructor
+  	private boolean failIfAll;
+
+  	private boolean failIfAny;
+
+
+  	@DataBoundConstructor
 	public CucumberTestResultArchiver(String testResults) {
 		this.testResults = testResults;
 	}
 
-	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps){
-		this(testResults);
-		setIgnoreBadSteps(ignoreBadSteps);
+	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps, boolean failIfAll, boolean failIfAny){
+	  this(testResults);
+	  setIgnoreBadSteps(ignoreBadSteps);
+	  setfailIfAll(failIfAll);
+	  setfailIfAny(failIfAny);
 	}
 
 	@DataBoundSetter
@@ -92,8 +99,22 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		this.ignoreBadSteps = ignoreBadSteps;
 	}
 
-	public boolean getIgnoreBadSteps(){
-		return ignoreBadSteps;
+  	@DataBoundSetter
+  	public void setfailIfAll(boolean failIfAll) { this.failIfAll = failIfAll; }
+
+	@DataBoundSetter
+	public void setfailIfAny(boolean failIfAny) { this.failIfAny = failIfAny; }
+
+  	public boolean getIgnoreBadSteps(){
+	    return ignoreBadSteps;
+	}
+
+  	public boolean getfailIfAll(){
+	    return failIfAll;
+	}
+
+	public boolean getfailIfAny(){
+	    return failIfAny;
 	}
 
 	@Override
@@ -166,10 +187,15 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		build.getActions().add(action);
 		CHECKPOINT.report();
 
-		if (action.getResult().getTotalCount() == action.getResult().getFailCount()){
+		if (failIfAll && action.getResult().getTotalCount() == action.getResult().getFailCount()){
 			build.setResult(Result.FAILURE);
 		} else if (action.getResult().getFailCount() > 0) {
-			build.setResult(Result.UNSTABLE);
+		    if (failIfAny){
+		      build.setResult(Result.FAILURE);
+		    }
+		    else {
+		      build.setResult(Result.UNSTABLE);
+		    }
 		}
 
 		return true;
@@ -239,8 +265,12 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		      newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
 			String testResults = formData.getString("testResults");
 			boolean ignoreBadSteps = formData.getBoolean("ignoreBadSteps");
-			LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
-			return new CucumberTestResultArchiver(testResults, ignoreBadSteps);
+		  	boolean failIfAll = formData.getBoolean("failIfAll");
+		  	boolean failIfAny = formData.getBoolean("failIfAny");
+		  	LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
+		  	LOGGER.fine("failIfAll = "+ failIfAll);
+		  	LOGGER.fine("failIfAny = "+ failIfAny);
+		  	return new CucumberTestResultArchiver(testResults, ignoreBadSteps, failIfAll, failIfAny);
 		}
 
 

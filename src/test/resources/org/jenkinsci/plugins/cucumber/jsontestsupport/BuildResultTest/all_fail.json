@@ -1,0 +1,81 @@
+[
+  {
+    "line": 1,
+    "elements": [
+      {
+        "line": 3,
+        "name": "Test1",
+        "description": "",
+        "id": "test1;test1",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 142011826,
+              "error_message": "java.lang.Exception: fail\n\tat pl.wojtun.MyStepdefs.Ifail(MyStepdefs.java:15)\n\tat ✽.Given I fail(Calculation.feature:4)\n",
+              "status": "failed"
+            },
+            "line": 4,
+            "name": "I fail",
+            "match": {
+              "location": "MyStepdefs.Ifail()"
+            },
+            "keyword": "Given "
+          }
+        ]
+      },
+      {
+        "line": 7,
+        "name": "Test2",
+        "description": "",
+        "id": "test1;test2",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 171006,
+              "error_message": "java.lang.Exception: fail\n\tat pl.wojtun.MyStepdefs.Ifail(MyStepdefs.java:15)\n\tat ✽.Given I fail(Calculation.feature:8)\n",
+              "status": "failed"
+            },
+            "line": 8,
+            "name": "I fail",
+            "match": {
+              "location": "MyStepdefs.Ifail()"
+            },
+            "keyword": "Given "
+          }
+        ]
+      },
+      {
+        "line": 11,
+        "name": "Test3",
+        "description": "",
+        "id": "test1;test3",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 192875,
+              "error_message": "java.lang.Exception: fail\n\tat pl.wojtun.MyStepdefs.Ifail(MyStepdefs.java:15)\n\tat ✽.Given I fail(Calculation.feature:12)\n",
+              "status": "failed"
+            },
+            "line": 12,
+            "name": "I fail",
+            "match": {
+              "location": "MyStepdefs.Ifail()"
+            },
+            "keyword": "Given "
+          }
+        ]
+      }
+    ],
+    "name": "test1",
+    "description": "",
+    "id": "test1",
+    "keyword": "Feature",
+    "uri": "Calculation.feature"
+  }
+]

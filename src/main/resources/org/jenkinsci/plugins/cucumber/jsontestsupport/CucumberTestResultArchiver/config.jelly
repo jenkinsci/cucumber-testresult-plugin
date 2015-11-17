@@ -32,12 +32,15 @@ THE SOFTWARE.
     <f:entry title="${%Ignore Bad Steps}">
         <f:checkbox field="ignoreBadSteps"/>
     </f:entry>
-    <f:entry title="${%Fail build if all scenarios failed}">
-        <f:checkbox field="failIfAll"/>
-    </f:entry>
-    <f:entry title="${%Fail build if any of scenarios failed}">
-        <f:checkbox field="failIfAny"/>
-    </f:entry>
+    <f:advanced>
+        <f:entry name="setResult" title="Set build result as: " field="setResult">
+            <select name="setResult">
+                <option value="unstable">UNSTABLE if any of scenarios failed</option>
+                <option value="failIfAny">FAILURE if any of scenarios failed</option>
+                <option value="failIfAll">FAILURE if all of scenarios failed</option>
+            </select>
+        </f:entry>
+     </f:advanced>
 <!--
   see hudson\tasks\junit\JUnitResultArchiver on how to add extended features if we want to support it.
 -->

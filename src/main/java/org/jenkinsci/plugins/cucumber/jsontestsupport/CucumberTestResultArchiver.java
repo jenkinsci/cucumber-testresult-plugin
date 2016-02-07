@@ -45,6 +45,7 @@ import hudson.tasks.Recorder;
 import hudson.tasks.test.TestResultAggregator;
 import hudson.tasks.test.TestResultProjectAction;
 import hudson.util.FormValidation;
+import jenkins.security.MasterToSlaveCallable;
 
 import java.io.File;
 import java.io.IOException;
@@ -215,12 +216,12 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	/**
 	 * {@link Callable} that gets the temporary directory from the node. 
 	 */
-	private final static class TmpDirCallable implements Callable<String, InterruptedException> {
+	private final static class TmpDirCallable extends MasterToSlaveCallable<String, InterruptedException> {
 
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public String call() throws InterruptedException {
+		public String call() {
 			return System.getProperty("java.io.tmpdir");
 		}
 	}

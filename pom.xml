@@ -30,7 +30,7 @@
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
 		<!-- lowest LTS that has fixes we require. -->
-		<version>1.580</version>
+		<version>1.609.2</version>
 		<relativePath />
 	</parent>
 
@@ -62,7 +62,7 @@
 		<developerConnection>scm:git:https://github.com/jenkinsci/cucumber-testresult-plugin.git</developerConnection>
 		<url>https://github.com/jenkinsci/cucumber-testresult-plugin/</url>
 	  <tag>HEAD</tag>
-  </scm>
+	</scm>
 
 	<licenses>
 		<license>

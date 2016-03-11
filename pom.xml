@@ -113,6 +113,11 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-step-api</artifactId>
+			<version>1.14</version>
+		</dependency>
 	</dependencies>
 
 	<build>

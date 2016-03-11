@@ -24,7 +24,6 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import gherkin.formatter.model.Feature;
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;

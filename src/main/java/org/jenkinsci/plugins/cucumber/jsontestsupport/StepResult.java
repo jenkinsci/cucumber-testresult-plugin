@@ -26,7 +26,6 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
 import gherkin.formatter.model.Step;
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.tasks.test.TestResult;
 

@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult.Status;
 import hudson.tasks.test.TestObject;

@@ -30,7 +30,6 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
 
 import java.io.File;
 import java.io.IOException;

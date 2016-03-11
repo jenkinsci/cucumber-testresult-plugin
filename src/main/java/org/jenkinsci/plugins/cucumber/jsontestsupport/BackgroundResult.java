@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import gherkin.formatter.model.Background;
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;

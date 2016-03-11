@@ -24,9 +24,7 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import hudson.XmlFile;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.AbstractBuild;
+import hudson.model.*;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.HeapSpaceStringConverter;
@@ -76,7 +74,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 
 
 	
-	public CucumberTestResultAction(AbstractBuild owner, CucumberTestResult result, BuildListener listener) {
+	public CucumberTestResultAction(Run<?, ?> owner, CucumberTestResult result, TaskListener listener) {
 		super(owner);
 		setResult(result, listener);
 	}
@@ -84,7 +82,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
    /**
     * Overwrites the {@link CucumberTestResult} by a new data set.
     */
-   public synchronized void setResult(CucumberTestResult result, BuildListener listener) {
+   public synchronized void setResult(CucumberTestResult result, TaskListener listener) {
        
    	 totalCount = result.getTotalCount();
        failCount = result.getFailCount();
@@ -102,7 +100,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
    }
 	
    private XmlFile getDataFile() {
-      return new XmlFile(XSTREAM,new File(owner.getRootDir(), "cucumberResult.xml"));
+      return new XmlFile(XSTREAM,new File(run.getRootDir(), "cucumberResult.xml"));
   }
 
    /**

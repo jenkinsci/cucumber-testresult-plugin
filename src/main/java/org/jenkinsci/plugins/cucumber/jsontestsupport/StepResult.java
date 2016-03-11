@@ -27,6 +27,7 @@ import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
 import gherkin.formatter.model.Step;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.test.TestResult;
 
 /**
@@ -41,7 +42,7 @@ public class StepResult extends TestResult {
 	private Result result;
 
 	private ScenarioResult parent;
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 
 
 	StepResult(Step step, Match match, Result result) {
@@ -57,12 +58,12 @@ public class StepResult extends TestResult {
 
 
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
 
-	void setOwner(AbstractBuild<?, ?> owner) {
+	void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 	}
 

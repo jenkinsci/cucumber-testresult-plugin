@@ -41,6 +41,7 @@ public class JsonTestResultStepExecution extends AbstractSynchronousStepExecutio
         }
 
         CucumberTestResultArchiver resultArchiver = new CucumberTestResultArchiver(target);
+        resultArchiver.publishReport(build, ws, launcher, listener);
         return null;
     }
 

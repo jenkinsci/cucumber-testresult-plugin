@@ -28,6 +28,7 @@ import java.util.Collection;
 
 import gherkin.formatter.model.Background;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -44,7 +45,7 @@ public class BackgroundResult extends TestResult {
 	
 	private ScenarioResult parent;
 	
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 	
 	/* Recomputed by a call to {@link CucumberTestResult#tally()} */
 	// true if this test failed
@@ -58,11 +59,11 @@ public class BackgroundResult extends TestResult {
 	}
 	
 	@Override
-   public AbstractBuild<?, ?> getOwner() {
+   public Run<?, ?> getRun() {
 	   return owner;
    }
 
-	void setOwner(AbstractBuild<?, ?> owner) {
+	void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 		for (StepResult sr : stepResults) {
 			sr.setOwner(owner);

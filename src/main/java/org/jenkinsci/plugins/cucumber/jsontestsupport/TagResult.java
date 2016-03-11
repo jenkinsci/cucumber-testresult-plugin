@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -47,7 +48,7 @@ public class TagResult extends MetaTabulatedResult {
 
 	private static final long serialVersionUID = -5418078481483188238L;
 
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 	private transient String safeName;
 
 	private Set<ScenarioResult> scenarioResults = new HashSet<ScenarioResult>();
@@ -102,12 +103,12 @@ public class TagResult extends MetaTabulatedResult {
 
 
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
 
-	public void setOwner(AbstractBuild<?, ?> owner) {
+	public void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 	}
 

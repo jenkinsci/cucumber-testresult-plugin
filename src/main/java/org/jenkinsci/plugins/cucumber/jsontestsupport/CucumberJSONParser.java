@@ -30,15 +30,12 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-
-import javax.annotation.Nonnull;
 
 /**
  * Parser that understands Cucumbers <a href="http://cukes.info/reports.html#json">JSON</a> notation and will
@@ -53,7 +50,7 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
     public CucumberJSONParser() {
     }
 
-    public CucumberJSONParser(boolean ignoreBadSteps) {
+    public CucumberJSONParser(boolean ignoreBadSteps){
         this.ignoreBadSteps = ignoreBadSteps;
     }
 
@@ -76,14 +73,16 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
                 // if no scenarios where executed for a feature then a json file may still exist.
                 if (s.isEmpty()) {
                     listener.getLogger().println("[Cucumber Tests] ignoring empty file (" + f.getName() + ")");
-                } else {
-                    listener.getLogger().println("[Cucumber Tests] parsing " + f.getName());
+                }
+                else {listener.getLogger().println("[Cucumber Tests] parsing " + f.getName());
                     jsonParser.parse(s);
                 }
             }
-        } catch (CucumberModelException ccm) {
+        }
+        catch (CucumberModelException ccm) {
             throw new AbortException("Failed to parse Cucumber JSON: " + ccm.getMessage());
-        } finally {
+        }
+        finally {
             // even though this is a noop prevent an eclipse warning.
             callback.close();
         }
@@ -94,10 +93,10 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
     @Override
     public CucumberTestResult parseResult(final String testResultLocations,
-                                    final Run<?, ?> build,
-                                    final FilePath workspace,
-                                    final Launcher launcher,
-                                    final TaskListener listener) throws InterruptedException, IOException {
+                                          final Run<?, ?> build,
+                                          final FilePath workspace,
+                                          final Launcher launcher,
+                                          final TaskListener listener) throws InterruptedException, IOException {
         // overridden so we tally and set the owner on the master.
         CucumberTestResult result = (CucumberTestResult) super.parseResult(testResultLocations, build, workspace, launcher, listener);
         result.tally();

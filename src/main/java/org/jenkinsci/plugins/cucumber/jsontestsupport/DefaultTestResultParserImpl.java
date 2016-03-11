@@ -36,7 +36,6 @@ import hudson.remoting.VirtualChannel;
 import hudson.tasks.test.TestResultParser;
 import hudson.tasks.test.TestResult;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -52,13 +51,13 @@ import java.util.List;
 /**
  * Default partial implementation of {@link TestResultParser} that handles GLOB dereferencing and other checks
  * for user errors, such as misconfigured GLOBs, up-to-date checks on test reports.
- * <p/>
+ * <p>
  * The instance of the parser will be serialized to the node that performed the build and the parsing will be
  * done remotely on that slave.
  *
+ * @since 1.343
  * @author Kohsuke Kawaguchi
  * @author James Nord
- * @since 1.343
  */
 public abstract class DefaultTestResultParserImpl extends TestResultParser implements Serializable {
 
@@ -73,13 +72,13 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
      * {@link TestResult}.
      *
      * @param reportFiles List of files to be parsed. Never be empty nor null.
-     * @param listener    Use this to report progress and other problems. Never null.
+     * @param listener Use this to report progress and other problems. Never null.
      * @throws InterruptedException If the user cancels the build, it will be received as a thread interruption.
-     *                              Do not catch it, and instead just forward that through the call stack.
-     * @throws IOException          If you don't care about handling exceptions gracefully, you can just throw
-     *                              IOException and let the default exception handling in Hudson takes care of it.
-     * @throws AbortException       If you encounter an error that you handled gracefully, throw this exception and
-     *                              Jenkins will not show a stack trace.
+     *            Do not catch it, and instead just forward that through the call stack.
+     * @throws IOException If you don't care about handling exceptions gracefully, you can just throw
+     *            IOException and let the default exception handling in Hudson takes care of it.
+     * @throws AbortException If you encounter an error that you handled gracefully, throw this exception and
+     *            Jenkins will not show a stack trace.
      */
     protected abstract TestResult
     parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException;
@@ -87,10 +86,10 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
     @Override
     public TestResult parseResult(final String testResultLocations,
-                                  final Run<?, ?> build,
-                                  final FilePath workspace,
-                                  final Launcher launcher,
-                                  final TaskListener listener) throws InterruptedException, IOException {
+                            final Run<?, ?> build,
+                            final FilePath workspace,
+                            final Launcher launcher,
+                            final TaskListener listener) throws InterruptedException, IOException {
         boolean ignoreTimestampCheck = IGNORE_TIMESTAMP_CHECK; // so that the property can be set on the master
         long buildTime = build.getTimestamp().getTimeInMillis();
         long nowMaster = System.currentTimeMillis();
@@ -101,6 +100,8 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
         return workspace.act(callable);
     }
+
+
 
 
     static final class ParseResultCallable implements FileCallable<TestResult> {
@@ -141,7 +142,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
             List<File> files = new ArrayList<File>(paths.length);
             for (FilePath path : paths) {
                 File report = new File(path.getRemote());
-                if (ignoreTimestampCheck || localBuildTime - 3000 /* error margin */ < report.lastModified()) {
+                if (ignoreTimestampCheck || localBuildTime - 3000 /* error margin */< report.lastModified()) {
                     // this file is created during this build
                     files.add(report);
                 }

@@ -77,29 +77,30 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
         this.testResults = testResults;
     }
 
-    public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps) {
+    public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps){
         this(testResults);
         setIgnoreBadSteps(ignoreBadSteps);
     }
 
     @DataBoundSetter
-    public void setIgnoreBadSteps(boolean ignoreBadSteps) {
+    public void setIgnoreBadSteps(boolean ignoreBadSteps){
         this.ignoreBadSteps = ignoreBadSteps;
     }
 
-    public boolean getIgnoreBadSteps() {
+    public boolean getIgnoreBadSteps(){
         return ignoreBadSteps;
     }
 
-
     @Override
     public boolean
-    perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException,
+            IOException {
         return publishReport(build, build.getWorkspace(), launcher, listener);
     }
 
     public boolean
-    publishReport(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+    publishReport(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException,
+            IOException {
         // listener.getLogger().println(Messages.JUnitResultArchiver_Recording());
 
         CucumberTestResultAction action;
@@ -146,7 +147,8 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
             CHECKPOINT.block();
 
-        } catch (AbortException e) {
+        }
+        catch (AbortException e) {
             if (build.getResult() == Result.FAILURE) {
                 // most likely a build failed before it gets to the test phase.
                 // don't report confusing error message.
@@ -155,7 +157,8 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
             listener.getLogger().println(e.getMessage());
             build.setResult(Result.FAILURE);
             return true;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace(listener.error("Failed to archive cucumber reports"));
             build.setResult(Result.FAILURE);
             return true;
@@ -164,7 +167,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
         build.getActions().add(action);
         CHECKPOINT.report();
 
-        if (action.getResult().getTotalCount() == action.getResult().getFailCount()) {
+        if (action.getResult().getTotalCount() == action.getResult().getFailCount()){
             build.setResult(Result.FAILURE);
         } else if (action.getResult().getFailCount() > 0) {
             build.setResult(Result.UNSTABLE);
@@ -189,7 +192,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
     @Override
     public Collection<Action> getProjectActions(AbstractProject<?, ?> project) {
-        return Collections.<Action>singleton(new TestResultProjectAction(project));
+        return Collections.<Action> singleton(new TestResultProjectAction(project));
     }
 
 
@@ -224,6 +227,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
     }
 
 
+
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -236,7 +240,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
         newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
             String testResults = formData.getString("testResults");
             boolean ignoreBadSteps = formData.getBoolean("ignoreBadSteps");
-            LOGGER.fine("ignoreBadSteps = " + ignoreBadSteps);
+            LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
             return new CucumberTestResultArchiver(testResults, ignoreBadSteps);
         }
 

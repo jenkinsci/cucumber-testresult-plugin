@@ -30,6 +30,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.model.AbstractBuild;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,63 +45,63 @@ import org.apache.commons.io.FileUtils;
 @Extension
 public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
-    private static final long serialVersionUID = -296964473181541824L;
-    private boolean ignoreBadSteps;
+	private static final long serialVersionUID = -296964473181541824L;
+	private boolean ignoreBadSteps;
 
-    public CucumberJSONParser() {
-    }
+	public CucumberJSONParser() {
+	}
 
-    public CucumberJSONParser(boolean ignoreBadSteps){
-        this.ignoreBadSteps = ignoreBadSteps;
-    }
+	public CucumberJSONParser(boolean ignoreBadSteps){
+		this.ignoreBadSteps = ignoreBadSteps;
+	}
 
-    @Override
-    public String getDisplayName() {
-        return "Cucumber JSON parser";
-    }
+	@Override
+	public String getDisplayName() {
+		return "Cucumber JSON parser";
+	}
 
-    @Override
-    protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
+	@Override
+	protected CucumberTestResult parse(List<File> reportFiles, TaskListener listener) throws InterruptedException, IOException {
+		
+		CucumberTestResult result = new CucumberTestResult();
+		GherkinCallback callback = new GherkinCallback(result, listener, ignoreBadSteps);
+		listener.getLogger().println("[Cucumber Tests] Parsing results.");
+		JSONParser jsonParser = new JSONParser(callback, callback);
+		
+		try {
+			for (File f : reportFiles) {
+				String s = FileUtils.readFileToString(f, "UTF-8");
+				// if no scenarios where executed for a feature then a json file may still exist.
+				if (s.isEmpty()) {
+					listener.getLogger().println("[Cucumber Tests] ignoring empty file (" + f.getName() + ")");
+				}
+				else {listener.getLogger().println("[Cucumber Tests] parsing " + f.getName());
+					jsonParser.parse(s);
+				}
+			}
+		}
+		catch (CucumberModelException ccm) {
+			throw new AbortException("Failed to parse Cucumber JSON: " + ccm.getMessage());
+		}
+		finally {
+			// even though this is a noop prevent an eclipse warning.
+			callback.close();
+		}
+		result.tally();
+		return result;
+	}
 
-        CucumberTestResult result = new CucumberTestResult();
-        GherkinCallback callback = new GherkinCallback(result, listener, ignoreBadSteps);
-        listener.getLogger().println("[Cucumber Tests] Parsing results.");
-        JSONParser jsonParser = new JSONParser(callback, callback);
 
-        try {
-            for (File f : reportFiles) {
-                String s = FileUtils.readFileToString(f, "UTF-8");
-                // if no scenarios where executed for a feature then a json file may still exist.
-                if (s.isEmpty()) {
-                    listener.getLogger().println("[Cucumber Tests] ignoring empty file (" + f.getName() + ")");
-                }
-                else {listener.getLogger().println("[Cucumber Tests] parsing " + f.getName());
-                    jsonParser.parse(s);
-                }
-            }
-        }
-        catch (CucumberModelException ccm) {
-            throw new AbortException("Failed to parse Cucumber JSON: " + ccm.getMessage());
-        }
-        finally {
-            // even though this is a noop prevent an eclipse warning.
-            callback.close();
-        }
-        result.tally();
-        return result;
-    }
-
-
-    @Override
-    public CucumberTestResult parseResult(final String testResultLocations,
-                                          final Run<?, ?> build,
-                                          final FilePath workspace,
-                                          final Launcher launcher,
-                                          final TaskListener listener) throws InterruptedException, IOException {
-        // overridden so we tally and set the owner on the master.
-        CucumberTestResult result = (CucumberTestResult) super.parseResult(testResultLocations, build, workspace, launcher, listener);
-        result.tally();
-        result.setOwner(build);
-        return result;
-    }
+	@Override
+	public CucumberTestResult parseResult(final String testResultLocations,
+	                        final Run<?, ?> build,
+                            final FilePath workspace,
+	                        final Launcher launcher,
+	                        final TaskListener listener) throws InterruptedException, IOException {
+		// overridden so we tally and set the owner on the master.
+		CucumberTestResult result = (CucumberTestResult) super.parseResult(testResultLocations, build, workspace, launcher, listener);
+		result.tally();
+		result.setOwner(build);
+		return result;
+	}
 }

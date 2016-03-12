@@ -36,7 +36,6 @@ import java.util.Set;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.export.Exported;
 
 /**
  * A TagResult is a pseudo result to link scenarios with the same tag.

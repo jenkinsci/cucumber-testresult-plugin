@@ -2,9 +2,9 @@
 <!--
   ~ The MIT License
   ~
-  ~ Copyright (c) 2014 James Nord
+  ~ Copyright (c) 2014-2016 James Nord
   ~               2013, Cisco Systems, Inc., a California corporation
-  ~               2015 CloudBees, Inc.
+  ~               2015,2016 CloudBees, Inc.
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -79,6 +79,20 @@
 			<version>1.2-beta-3</version>
 		</dependency>
 		<dependency>
+			<!-- replace with the actual hpis that we need -->
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-aggregator</artifactId>
+			<version>1.13</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-support</artifactId>
+			<version>1.13</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>matrix-project</artifactId>
 			<version>1.4</version>
@@ -101,6 +115,7 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>

@@ -107,62 +107,56 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 		final String _testResults = build.getEnvironment(listener).expand(this.testResults);
 
-		try {
-			CucumberJSONParser parser = new CucumberJSONParser(ignoreBadSteps);
+		CucumberJSONParser parser = new CucumberJSONParser(ignoreBadSteps);
 
-			CucumberTestResult result = parser.parse(_testResults, build, launcher, listener);
+		CucumberTestResult result = parser.parse(_testResults, build, launcher, listener);
 
-			// TODO - look at all of the Scenarios and see if there are any embedded items contained with in them
-			String remoteTempDir = launcher.getChannel().call(new TmpDirCallable());
+		// TODO - look at all of the Scenarios and see if there are any embedded items contained with in them
+		String remoteTempDir = launcher.getChannel().call(new TmpDirCallable());
 
-			// if so we need to copy them to the master.
-			for (FeatureResult f : result.getFeatures()) {
-				for (ScenarioResult s : f.getScenarioResults()) {
-					for (EmbeddedItem item : s.getEmbeddedItems()) {
-						// this is the wrong place to do the copying...
-						// XXX Need to do something with MasterToSlaveCallable to makesure we are safe from evil
-						// injection
-						FilePath srcFilePath = new FilePath(launcher.getChannel(), remoteTempDir + '/' + item.getFilename());
-						// XXX when we support the workflow we will need to make sure that these files do not clash....
-						File destRoot = new File(build.getRootDir(), "/cucumber/embed/" + f.getSafeName() + '/' + s
-								.getSafeName() + '/');
-						destRoot.mkdirs();
-						File destFile = new File(destRoot, item.getFilename());
-						if (!destFile.getAbsolutePath().startsWith(destRoot.getAbsolutePath())) {
-							// someone is trying to trick us into writing abitrary files...
-							throw new IOException("Exploit attempt detected - Build attempted to write to " +
-									destFile.getAbsolutePath());
-						}
-						FilePath destFilePath = new FilePath(destFile);
-						srcFilePath.copyTo(destFilePath);
-						srcFilePath.delete();
+		// if so we need to copy them to the master.
+		for (FeatureResult f : result.getFeatures()) {
+			for (ScenarioResult s : f.getScenarioResults()) {
+				for (EmbeddedItem item : s.getEmbeddedItems()) {
+					// this is the wrong place to do the copying...
+					// XXX Need to do something with MasterToSlaveCallable to makesure we are safe from evil
+					// injection
+					FilePath srcFilePath = new FilePath(launcher.getChannel(), remoteTempDir + '/' + item.getFilename());
+					// XXX when we support the workflow we will need to make sure that these files do not clash....
+					File destRoot = new File(build.getRootDir(), "/cucumber/embed/" + f.getSafeName() + '/' + s
+							.getSafeName() + '/');
+					destRoot.mkdirs();
+					File destFile = new File(destRoot, item.getFilename());
+					if (!destFile.getAbsolutePath().startsWith(destRoot.getAbsolutePath())) {
+						// someone is trying to trick us into writing abitrary files...
+						throw new IOException("Exploit attempt detected - Build attempted to write to " +
+								destFile.getAbsolutePath());
 					}
+					FilePath destFilePath = new FilePath(destFile);
+					srcFilePath.copyTo(destFilePath);
+					srcFilePath.delete();
 				}
 			}
-			
+		}
+		
+		action = build.getAction(CucumberTestResultAction.class);
+		
+		if (action == null) {
 			action = new CucumberTestResultAction(build, result, listener);
-
-			if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
-				throw new AbortException("No cucumber scenarios appear to have been run.");
-
-			CHECKPOINT.block();
-
+			build.addAction(action);
 		}
-		catch (AbortException e) {
-			if (build.getResult() == Result.FAILURE) {
-				// most likely a build failed before it gets to the test phase.
-				// don't report confusing error message.
-				return true;
-			}
-			listener.getLogger().println(e.getMessage());
-			build.setResult(Result.FAILURE);
-			return true;
+		else {
+			action.mergeResult(result, listener);
+			build.save();
 		}
-		catch (IOException e) {
-			e.printStackTrace(listener.error("Failed to archive cucumber reports"));
-			build.setResult(Result.FAILURE);
-			return true;
-		}
+		// action.setHealthScaleFactor(getHealthScaleFactor()); // overwrites previous value if appending
+		
+
+		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
+			throw new AbortException("No cucumber scenarios appear to have been run.");
+
+		CHECKPOINT.block();
+
 
 		build.getActions().add(action);
 		CHECKPOINT.report();

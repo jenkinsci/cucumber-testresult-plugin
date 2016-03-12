@@ -165,6 +165,24 @@ public class CucumberJSONParserTest {
 		                                   .getEmbeddedItems(), hasSize(1));
 	}
 
+	@Test
+	public void testMergedItemsRetainSafeNames() throws Exception {
+		CucumberJSONParser parser = new CucumberJSONParser();
+
+		File f = getResourceAsFile("ScenarioResultTest/cucumber-embedded-item.json");
+
+		List<File> files = new ArrayList<File>();
+		files.add(f);
+
+		TaskListener mockListener = Mockito.mock(TaskListener.class);
+		Mockito.when(mockListener.getLogger()).thenReturn(System.out);
+
+		CucumberTestResult testresult = parser.parse(files, mockListener);
+		assertThat("Embedded items found", testresult.getFeatures().iterator().next().getChildren().iterator().next()
+		                                   .getEmbeddedItems(), hasSize(1));
+		
+	}
+	
 	private static File getResourceAsFile(String resource) throws Exception {
 		URL url = CucumberJSONParserTest.class.getResource(resource);
 		Assert.assertNotNull("Resource " + resource + " could not be found", url);

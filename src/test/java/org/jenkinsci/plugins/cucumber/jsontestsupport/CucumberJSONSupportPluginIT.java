@@ -31,6 +31,11 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Node;
 import hudson.slaves.DumbSlave;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,6 +45,7 @@ import org.jvnet.hudson.test.SingleFileSCM;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class CucumberJSONSupportPluginIT {
 
@@ -72,9 +78,58 @@ public class CucumberJSONSupportPluginIT {
 		assertThat("Needs to build on the salve to check serialization", build.getBuiltOn(), is((Node) slave));
 	}
 	
+	public void testMergeStability() throws Exception {
+		WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "merge");
+		
+		job.setDefinition(new CpsFlowDefinition("node {\n" + 
+										"  writeFile name: 'test1.json', text: '''" + 
+										getResourceAsString("featurePass.json") + 
+										"  '''\n" + 
+										"  step([$class: 'CucumberTestResultArchiver', testResults: 'pass.json'])\n" + 
+										"}\n" + 
+										"semaphore 'wait'\n" + 
+										"node {\n" + 
+										"  writeFile name: 'test1.json', text: '''" + 
+										getResourceAsString("featureFail.json") + 
+										"  '''\n" + 
+										"  step([$class: 'CucumberTestResultArchiver', testResults: 'fail.json'])\n" + 
+										"}"));
+		
+		WorkflowRun r = job.scheduleBuild2(0).getStartCondition().get();
+
+		// until after the first parsing has occurred.
+		SemaphoreStep.waitForStart("watch/1", r);
+
+		assertTrue(JenkinsRule.getLog(r), r.isBuilding());
+
+		// XXX check the test result is passing
+		// get a name that will be re-used...
+		
+		// resume the build
+		
+		jenkinsRule.waitForCompletion(r);
+		
+		
+		// get the same result again
+		// check the scenario is still marked as passing
+		
+		// check the build is unstable
+		// check we have recorded the results correctly.
+		// the new scenario should be failing.
+		
+		
+		
+		// XXX do the same in reverse.
+	}
+	
 	private static URL getResource(String resource) throws Exception {
 		URL url = CucumberJSONSupportPluginIT.class.getResource(CucumberJSONSupportPluginIT.class.getSimpleName() + "/" + resource);
 		Assert.assertNotNull("Resource " + resource + " could not be found", url);
 		return url;
+	}
+	
+	private static String getResourceAsString(String resource) throws Exception {
+		URL url = getResource(resource);
+		return org.apache.commons.io.IOUtils.toString(url);
 	}
 }

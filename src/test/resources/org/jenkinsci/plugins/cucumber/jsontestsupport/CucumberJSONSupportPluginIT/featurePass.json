@@ -1,0 +1,46 @@
+[
+  {
+    "uri": "features/one_passing.feature",
+    "keyword": "Feature",
+    "id": "one-passing-scenario",
+    "name": "One passing scenario",
+    "line": 1,
+    "description": "",
+    "tags": [
+      {
+        "name": "@a",
+        "line": 1
+      }
+    ],
+    "elements": [
+      {
+        "keyword": "Scenario",
+        "id": "one-passing-scenario",
+        "name": "Passing",
+        "line": 5,
+        "description": "",
+        "tags": [
+          {
+            "name": "@b",
+            "line": 4
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "this step passes",
+            "line": 6,
+            "match": {
+              "location": "features/step_definitions/steps.rb:1"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

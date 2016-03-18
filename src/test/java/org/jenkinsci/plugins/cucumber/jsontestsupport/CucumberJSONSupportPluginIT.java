@@ -23,16 +23,15 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.io.File;
 import java.net.URL;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Node;
+import hudson.model.Result;
 import hudson.slaves.DumbSlave;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
@@ -77,49 +76,48 @@ public class CucumberJSONSupportPluginIT {
 
 		assertThat("Needs to build on the salve to check serialization", build.getBuiltOn(), is((Node) slave));
 	}
-	
+
+	@Test
+	@Issue("JENKINS-26340")
 	public void testMergeStability() throws Exception {
 		WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "merge");
-		
-		job.setDefinition(new CpsFlowDefinition("node {\n" + 
-										"  writeFile name: 'test1.json', text: '''" + 
-										getResourceAsString("featurePass.json") + 
-										"  '''\n" + 
-										"  step([$class: 'CucumberTestResultArchiver', testResults: 'pass.json'])\n" + 
-										"}\n" + 
-										"semaphore 'wait'\n" + 
-										"node {\n" + 
-										"  writeFile name: 'test1.json', text: '''" + 
-										getResourceAsString("featureFail.json") + 
-										"  '''\n" + 
-										"  step([$class: 'CucumberTestResultArchiver', testResults: 'fail.json'])\n" + 
+
+		job.setDefinition(new CpsFlowDefinition("node {\n" +
+										"  writeFile file: 'pass.json', text: '''" +
+										getResourceAsString("featurePass.json") +
+										"  '''\n" +
+										"  publishJsonTestResult(target: 'pass.json')\n" +
+										"}\n" +
+										"semaphore 'wait'\n" +
+										"node {\n" +
+										"  writeFile file: 'fail.json', text: '''" +
+										getResourceAsString("featureFail.json") +
+										"  '''\n" +
+										"  publishJsonTestResult(target: 'fail.json')\n" +
 										"}"));
+
 		
 		WorkflowRun r = job.scheduleBuild2(0).getStartCondition().get();
-
 		// until after the first parsing has occurred.
-		SemaphoreStep.waitForStart("watch/1", r);
+		SemaphoreStep.waitForStart("wait/1", r);
 
 		assertTrue(JenkinsRule.getLog(r), r.isBuilding());
 
-		// XXX check the test result is passing
-		// get a name that will be re-used...
-		
+		// check the scenario is 1 passing
+		assertTrue(r.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
+
 		// resume the build
-		
+		SemaphoreStep.success("wait/1", true);
+
 		jenkinsRule.waitForCompletion(r);
-		
-		
-		// get the same result again
-		// check the scenario is still marked as passing
-		
+
+		// check the scenario is 1 passing and 1 failing
+		assertTrue(r.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
+		assertTrue(r.getAction(CucumberTestResultAction.class).getResult().getFailCount() == 1);
+
 		// check the build is unstable
-		// check we have recorded the results correctly.
-		// the new scenario should be failing.
-		
-		
-		
-		// XXX do the same in reverse.
+		jenkinsRule.assertBuildStatus(Result.UNSTABLE, r);
+
 	}
 	
 	private static URL getResource(String resource) throws Exception {

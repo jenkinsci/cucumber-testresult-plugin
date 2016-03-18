@@ -1,0 +1,47 @@
+[
+  {
+    "uri": "features/one_failing.feature",
+    "keyword": "Feature",
+    "id": "one-failing-scenario",
+    "name": "One failing scenario",
+    "line": 1,
+    "description": "",
+    "tags": [
+      {
+        "name": "@a",
+        "line": 1
+      }
+    ],
+    "elements": [
+      {
+        "keyword": "Scenario",
+        "id": "one-failing-scenario;failing",
+        "name": "Failing",
+        "line": 9,
+        "description": "",
+        "tags": [
+          {
+            "name": "@c",
+            "line": 8
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "this step fails",
+            "line": 10,
+            "match": {
+              "location": "features/step_definitions/steps.rb:4"
+            },
+            "result": {
+              "status": "failed",
+              "error_message": " (RuntimeError)\n./features/step_definitions/steps.rb:4:in /^this step fails$/'\nfeatures/one_passing_one_failing.feature:10:in Given this step fails'",
+              "duration": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -33,6 +33,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.tasks.test.TestResultParser;
+import jenkins.MasterToSlaveFileCallable;
 import hudson.tasks.test.TestResult;
 
 import java.io.File;
@@ -103,7 +104,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
 
 
-	static final class ParseResultCallable implements FileCallable<TestResult> {
+	static final class ParseResultCallable extends MasterToSlaveFileCallable<TestResult> {
 
 		private static final long serialVersionUID = -5438084460911132640L;
 		private DefaultTestResultParserImpl parserImpl;

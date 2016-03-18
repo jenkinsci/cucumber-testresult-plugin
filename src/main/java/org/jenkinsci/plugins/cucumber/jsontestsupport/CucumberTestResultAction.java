@@ -183,4 +183,24 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
     public  String getUrlName() {
        return "cucumberTestReport";
    }
+
+	/**
+	 * Merge results from other into an existing set of results.
+	 * @param other
+	 *           the result to merge with the current results.
+	 * @param listener
+	 */
+	synchronized void mergeResult(CucumberTestResult other, TaskListener listener) {
+		CucumberTestResult cr = getResult();
+		for (FeatureResult fr : other.getFeatures()) {
+			// We need to add =the new results to the existing ones to keep the names stable
+			// otherwise any embedded items will be attached to the wrong result
+			// XXX this has the potential to cause a concurrentModificationException or other bad issues if someone is getting all the features...
+			cr.addFeatureResult(fr);
+		}
+		//cr.tally();
+		// XXX Do we need to add TagResults or call tally()?
+		// persist the new result to disk
+		this.setResult(cr, listener);
+	}
 }

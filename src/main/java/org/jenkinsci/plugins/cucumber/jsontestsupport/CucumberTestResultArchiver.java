@@ -144,7 +144,9 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		
 		if (action == null) {
 			action = new CucumberTestResultAction(build, result, listener);
+			CHECKPOINT.block();
 			build.addAction(action);
+			CHECKPOINT.report();
 		}
 		else {
 			action.mergeResult(result, listener);
@@ -155,12 +157,6 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
 			throw new AbortException("No cucumber scenarios appear to have been run.");
-
-		CHECKPOINT.block();
-
-
-		build.getActions().add(action);
-		CHECKPOINT.report();
 
 		if (action.getResult().getTotalCount() == action.getResult().getFailCount()){
 			build.setResult(Result.FAILURE);

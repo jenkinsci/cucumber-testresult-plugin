@@ -43,6 +43,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SingleFileSCM;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -80,7 +81,7 @@ public class CucumberJSONSupportPluginIT {
 	@Test
 	@Issue("JENKINS-26340")
 	public void testMergeStability() throws Exception {
-		WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "merge");
+		WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "merge1");
 
 		job.setDefinition(new CpsFlowDefinition("node {\n" +
 										"  writeFile file: 'pass.json', text: '''" +
@@ -96,29 +97,127 @@ public class CucumberJSONSupportPluginIT {
 										"  publishJsonTestResult(target: 'fail.json')\n" +
 										"}"));
 
-		
-		WorkflowRun r = job.scheduleBuild2(0).getStartCondition().get();
-		// until after the first parsing has occurred.
-		SemaphoreStep.waitForStart("wait/1", r);
 
-		assertTrue(JenkinsRule.getLog(r), r.isBuilding());
+		WorkflowRun r1 = job.scheduleBuild2(0).getStartCondition().get();
+		// until after the first parsing has occurred.
+		SemaphoreStep.waitForStart("wait/1", r1);
+
+		assertTrue(JenkinsRule.getLog(r1), r1.isBuilding());
 
 		// check the scenario is 1 passing
-		assertTrue(r.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
-
+		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getPassCount(), 1);
+		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 1);
+		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
+			assertEquals(featureResult.getId(), "cucumber/foo-feature");
+			assertEquals(featureResult.getName(), "foo-feature");
+			if(featureResult.getURI().equals("foo-feature-1")) {
+				assertEquals(featureResult.getPassCount(), 1);
+				assertEquals(featureResult.getFailCount(), 0);
+			}
+			if(featureResult.getURI().equals("foo-feature-2")) {
+				assertEquals(featureResult.getPassCount(), 0);
+				assertEquals(featureResult.getFailCount(), 1);
+			}
+		}
 		// resume the build
 		SemaphoreStep.success("wait/1", true);
 
-		jenkinsRule.waitForCompletion(r);
+		jenkinsRule.waitForCompletion(r1);
 
 		// check the scenario is 1 passing and 1 failing
-		assertTrue(r.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
-		assertTrue(r.getAction(CucumberTestResultAction.class).getResult().getFailCount() == 1);
-
+		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
+		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getFailCount() == 1);
+		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 2);
+		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
+			assertEquals(featureResult.getId(), "cucumber/foo-feature");
+			assertEquals(featureResult.getName(), "foo-feature");
+			if(featureResult.getURI().equals("foo-feature-1")) {
+				assertEquals(featureResult.getPassCount(), 1);
+				assertEquals(featureResult.getFailCount(), 0);
+			}
+			if(featureResult.getURI().equals("foo-feature-2")) {
+				assertEquals(featureResult.getPassCount(), 0);
+				assertEquals(featureResult.getFailCount(), 1);
+			}
+		}
 		// check the build is unstable
-		jenkinsRule.assertBuildStatus(Result.UNSTABLE, r);
-
+		jenkinsRule.assertBuildStatus(Result.UNSTABLE, r1);
 	}
+
+
+	@Test
+	@Issue("JENKINS-26340")
+	public void testMergeStability2() throws Exception {
+		WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "merge2");
+
+		job.setDefinition(new CpsFlowDefinition("node {\n" +
+				"  writeFile file: 'fail.json', text: '''" +
+				getResourceAsString("featureFail.json") +
+				"  '''\n" +
+				"  publishJsonTestResult(target: 'fail.json')\n" +
+				"}\n" +
+				"semaphore 'wait'\n" +
+				"node {\n" +
+				"  writeFile file: 'pass.json', text: '''" +
+				getResourceAsString("featurePass.json") +
+				"  '''\n" +
+				"  publishJsonTestResult(target: 'pass.json')\n" +
+				"}"));
+
+
+		WorkflowRun r1 = job.scheduleBuild2(0).getStartCondition().get();
+		// until after the first parsing has occurred.
+		SemaphoreStep.waitForStart("wait/1", r1);
+
+		assertTrue(JenkinsRule.getLog(r1), r1.isBuilding());
+
+		// check the scenario is 1 failing
+		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFailCount(), 1);
+		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 1);
+		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
+			assertEquals(featureResult.getId(), "cucumber/foo-feature");
+			assertEquals(featureResult.getName(), "foo-feature");
+			if(featureResult.getURI().equals("foo-feature-1")) {
+				assertEquals(featureResult.getPassCount(), 1);
+				assertEquals(featureResult.getFailCount(), 0);
+			}
+			if(featureResult.getURI().equals("foo-feature-2")) {
+				assertEquals(featureResult.getPassCount(), 0);
+				assertEquals(featureResult.getFailCount(), 1);
+			}
+		}
+		// resume the build
+		SemaphoreStep.success("wait/1", true);
+
+		jenkinsRule.waitForCompletion(r1);
+
+		// check the scenario is 1 passing and 1 failing
+		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
+		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getFailCount() == 1);
+		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 2);
+		boolean feature1 = false;
+		boolean feature2 = false;
+		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
+			assertEquals(featureResult.getId(), "cucumber/foo-feature");
+			assertEquals(featureResult.getName(), "foo-feature");
+			if(featureResult.getURI().equals("foo-feature-1")) {
+				assertEquals(featureResult.getPassCount(), 1);
+				assertEquals(featureResult.getFailCount(), 0);
+				feature1 = true;
+			}
+			if(featureResult.getURI().equals("foo-feature-2")) {
+				assertEquals(featureResult.getPassCount(), 0);
+				assertEquals(featureResult.getFailCount(), 1);
+				feature2 = true;
+			}
+		}
+		assertTrue(feature1);
+		assertTrue(feature2);
+		// check the build is failure
+		jenkinsRule.assertBuildStatus(Result.FAILURE, r1);
+	}
+
+
 	
 	private static URL getResource(String resource) throws Exception {
 		URL url = CucumberJSONSupportPluginIT.class.getResource(CucumberJSONSupportPluginIT.class.getSimpleName() + "/" + resource);

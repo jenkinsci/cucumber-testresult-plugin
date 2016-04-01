@@ -1,9 +1,9 @@
 [
   {
-    "uri": "features/one_failing.feature",
+    "uri": "foo-feature-2",
     "keyword": "Feature",
-    "id": "one-failing-scenario",
-    "name": "One failing scenario",
+    "id": "foo-feature",
+    "name": "foo-feature",
     "line": 1,
     "description": "",
     "tags": [
@@ -15,7 +15,7 @@
     "elements": [
       {
         "keyword": "Scenario",
-        "id": "one-failing-scenario;failing",
+        "id": "foo-scenario",
         "name": "Failing",
         "line": 9,
         "description": "",

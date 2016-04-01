@@ -1,9 +1,9 @@
 [
   {
-    "uri": "features/one_passing.feature",
+    "uri": "foo-feature-1",
     "keyword": "Feature",
-    "id": "one-passing-scenario",
-    "name": "One passing scenario",
+    "id": "foo-feature",
+    "name": "foo-feature",
     "line": 1,
     "description": "",
     "tags": [
@@ -15,7 +15,7 @@
     "elements": [
       {
         "keyword": "Scenario",
-        "id": "one-passing-scenario",
+        "id": "foo-scenario",
         "name": "Passing",
         "line": 5,
         "description": "",

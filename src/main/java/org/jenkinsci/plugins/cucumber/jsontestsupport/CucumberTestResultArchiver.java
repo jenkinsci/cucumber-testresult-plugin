@@ -31,7 +31,14 @@ import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.CheckPoint;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.remoting.Callable;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -48,6 +55,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
 
+import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 
 import org.apache.tools.ant.types.FileSet;
@@ -63,7 +71,7 @@ import org.kohsuke.stapler.DataBoundSetter;
  * @author James Nord
  * @author Kohsuke Kawaguchi (original JUnit code)
  */
-public class CucumberTestResultArchiver extends Recorder implements MatrixAggregatable {
+public class CucumberTestResultArchiver extends Recorder implements MatrixAggregatable, SimpleBuildStep {
 	private static final Logger LOGGER = Logger.getLogger(CucumberTestResultArchiver.class.getName());
 
 	/**
@@ -98,6 +106,13 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
             IOException {
         return publishReport(build, build.getWorkspace(), launcher, listener);
     }
+
+
+	@Override
+	public void perform(Run<?, ?> run, FilePath filePath, Launcher launcher, TaskListener taskListener) throws InterruptedException, IOException {
+		publishReport(run, filePath, launcher, taskListener);
+	}
+
 
 	public boolean
 	      publishReport(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException,
@@ -149,8 +164,10 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			CHECKPOINT.report();
 		}
 		else {
+			CHECKPOINT.block();
 			action.mergeResult(result, listener);
 			build.save();
+			CHECKPOINT.report();
 		}
 		// action.setHealthScaleFactor(getHealthScaleFactor()); // overwrites previous value if appending
 		

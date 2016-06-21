@@ -24,7 +24,9 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import hudson.XmlFile;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.HeapSpaceStringConverter;

@@ -79,17 +79,22 @@
 			<version>1.2-beta-3</version>
 		</dependency>
 		<dependency>
-			<!-- replace with the actual hpis that we need -->
 			<groupId>org.jenkins-ci.plugins.workflow</groupId>
 			<artifactId>workflow-aggregator</artifactId>
 			<version>1.13</version>
-			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jenkins-ci.plugins.workflow</groupId>
 			<artifactId>workflow-support</artifactId>
 			<version>1.13</version>
 			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins.workflow</groupId>
+			<artifactId>workflow-step-api</artifactId>
+			<version>1.14</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -127,11 +132,6 @@
 			<artifactId>mockito-core</artifactId>
 			<version>1.9.5</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins.workflow</groupId>
-			<artifactId>workflow-step-api</artifactId>
-			<version>1.14</version>
 		</dependency>
 	</dependencies>
 

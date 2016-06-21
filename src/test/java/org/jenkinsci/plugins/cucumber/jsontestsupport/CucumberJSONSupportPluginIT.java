@@ -25,12 +25,14 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import java.net.URL;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.slaves.DumbSlave;
 
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -43,7 +45,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SingleFileSCM;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -51,6 +52,8 @@ public class CucumberJSONSupportPluginIT {
 
 	@Rule
 	public JenkinsRule jenkinsRule = new JenkinsRule();
+
+	JenkinsRule.WebClient wc;
 
 	@Test
 	@Issue("JENKINS-28588")
@@ -87,14 +90,14 @@ public class CucumberJSONSupportPluginIT {
 										"  writeFile file: 'pass.json', text: '''" +
 										getResourceAsString("featurePass.json") +
 										"  '''\n" +
-										"  publishJsonTestResult(target: 'pass.json')\n" +
+										"  step($class: 'CucumberTestResultArchiver', testResults: 'pass.json')\n" +
 										"}\n" +
 										"semaphore 'wait'\n" +
 										"node {\n" +
 										"  writeFile file: 'fail.json', text: '''" +
 										getResourceAsString("featureFail.json") +
 										"  '''\n" +
-										"  publishJsonTestResult(target: 'fail.json')\n" +
+										"  step($class: 'CucumberTestResultArchiver', testResults: 'fail.json')\n" +
 										"}"));
 
 
@@ -105,41 +108,20 @@ public class CucumberJSONSupportPluginIT {
 		assertTrue(JenkinsRule.getLog(r1), r1.isBuilding());
 
 		// check the scenario is 1 passing
-		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getPassCount(), 1);
-		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 1);
-		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
-			assertEquals(featureResult.getId(), "cucumber/foo-feature");
-			assertEquals(featureResult.getName(), "foo-feature");
-			if(featureResult.getURI().equals("foo-feature-1")) {
-				assertEquals(featureResult.getPassCount(), 1);
-				assertEquals(featureResult.getFailCount(), 0);
-			}
-			if(featureResult.getURI().equals("foo-feature-2")) {
-				assertEquals(featureResult.getPassCount(), 0);
-				assertEquals(featureResult.getFailCount(), 1);
-			}
-		}
+		wc = jenkinsRule.createWebClient();
+		HtmlPage htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
+		assertTrue(checkPageContains(htmlPage, "0 failures"));
 		// resume the build
 		SemaphoreStep.success("wait/1", true);
 
 		jenkinsRule.waitForCompletion(r1);
-
 		// check the scenario is 1 passing and 1 failing
-		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
-		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getFailCount() == 1);
-		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 2);
-		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
-			assertEquals(featureResult.getId(), "cucumber/foo-feature");
-			assertEquals(featureResult.getName(), "foo-feature");
-			if(featureResult.getURI().equals("foo-feature-1")) {
-				assertEquals(featureResult.getPassCount(), 1);
-				assertEquals(featureResult.getFailCount(), 0);
-			}
-			if(featureResult.getURI().equals("foo-feature-2")) {
-				assertEquals(featureResult.getPassCount(), 0);
-				assertEquals(featureResult.getFailCount(), 1);
-			}
-		}
+		Jenkins.getInstance().reload();
+		wc = jenkinsRule.createWebClient();
+		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
+		assertTrue(checkPageContains(htmlPage, "0 failures"));
+		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature_2");
+		assertTrue(checkPageContains(htmlPage, "1 failures"));
 		// check the build is unstable
 		jenkinsRule.assertBuildStatus(Result.UNSTABLE, r1);
 	}
@@ -154,14 +136,14 @@ public class CucumberJSONSupportPluginIT {
 				"  writeFile file: 'fail.json', text: '''" +
 				getResourceAsString("featureFail.json") +
 				"  '''\n" +
-				"  publishJsonTestResult(target: 'fail.json')\n" +
+				"  step($class: 'CucumberTestResultArchiver', testResults: 'fail.json')\n" +
 				"}\n" +
 				"semaphore 'wait'\n" +
 				"node {\n" +
 				"  writeFile file: 'pass.json', text: '''" +
 				getResourceAsString("featurePass.json") +
 				"  '''\n" +
-				"  publishJsonTestResult(target: 'pass.json')\n" +
+				"  step($class: 'CucumberTestResultArchiver', testResults: 'pass.json')\n" +
 				"}"));
 
 
@@ -172,47 +154,21 @@ public class CucumberJSONSupportPluginIT {
 		assertTrue(JenkinsRule.getLog(r1), r1.isBuilding());
 
 		// check the scenario is 1 failing
-		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFailCount(), 1);
-		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 1);
-		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
-			assertEquals(featureResult.getId(), "cucumber/foo-feature");
-			assertEquals(featureResult.getName(), "foo-feature");
-			if(featureResult.getURI().equals("foo-feature-1")) {
-				assertEquals(featureResult.getPassCount(), 1);
-				assertEquals(featureResult.getFailCount(), 0);
-			}
-			if(featureResult.getURI().equals("foo-feature-2")) {
-				assertEquals(featureResult.getPassCount(), 0);
-				assertEquals(featureResult.getFailCount(), 1);
-			}
-		}
+		wc = jenkinsRule.createWebClient();
+		HtmlPage htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
+		assertTrue(checkPageContains(htmlPage, "1 failures"));
 		// resume the build
 		SemaphoreStep.success("wait/1", true);
 
 		jenkinsRule.waitForCompletion(r1);
 
 		// check the scenario is 1 passing and 1 failing
-		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getPassCount() == 1);
-		assertTrue(r1.getAction(CucumberTestResultAction.class).getResult().getFailCount() == 1);
-		assertEquals(r1.getAction(CucumberTestResultAction.class).getResult().getFeatures().size(), 2);
-		boolean feature1 = false;
-		boolean feature2 = false;
-		for(FeatureResult featureResult : r1.getAction(CucumberTestResultAction.class).getResult().getFeatures()){
-			assertEquals(featureResult.getId(), "cucumber/foo-feature");
-			assertEquals(featureResult.getName(), "foo-feature");
-			if(featureResult.getURI().equals("foo-feature-1")) {
-				assertEquals(featureResult.getPassCount(), 1);
-				assertEquals(featureResult.getFailCount(), 0);
-				feature1 = true;
-			}
-			if(featureResult.getURI().equals("foo-feature-2")) {
-				assertEquals(featureResult.getPassCount(), 0);
-				assertEquals(featureResult.getFailCount(), 1);
-				feature2 = true;
-			}
-		}
-		assertTrue(feature1);
-		assertTrue(feature2);
+		Jenkins.getInstance().reload();
+		wc = jenkinsRule.createWebClient();
+		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
+		assertTrue(checkPageContains(htmlPage, "1 failures"));
+		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature_2");
+		assertTrue(checkPageContains(htmlPage, "0 failures"));
 		// check the build is failure
 		jenkinsRule.assertBuildStatus(Result.FAILURE, r1);
 	}
@@ -228,5 +184,9 @@ public class CucumberJSONSupportPluginIT {
 	private static String getResourceAsString(String resource) throws Exception {
 		URL url = getResource(resource);
 		return org.apache.commons.io.IOUtils.toString(url);
+	}
+
+	private static boolean checkPageContains(HtmlPage htmlPage, String content) {
+		return htmlPage.asText().contains(content);
 	}
 }

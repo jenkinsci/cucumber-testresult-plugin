@@ -48,7 +48,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.javadoc.skip>true</maven.javadoc.skip>
 	</properties>
 
 	<developers>
@@ -165,6 +164,11 @@
 					<artifactId>maven-release-plugin</artifactId>
 					<!-- work around MRELEASE-875 -->
 					<version>2.5.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration><skip>true</skip></configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

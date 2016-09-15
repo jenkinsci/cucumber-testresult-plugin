@@ -59,7 +59,7 @@
 
 	<scm>
 		<connection>scm:git:git://git@github.com/jenkinsci/cucumber-testresult-plugin.git</connection>
-		<developerConnection>scm:git:git://git@github.com/jenkinsci/cucumber-testresult-plugin.git</developerConnection>
+		<developerConnection>scm:git:git@github.com:jenkinsci/cucumber-testresult-plugin.git</developerConnection>
 		<url>https://github.com/jenkinsci/cucumber-testresult-plugin/</url>
 	  <tag>HEAD</tag>
 	</scm>

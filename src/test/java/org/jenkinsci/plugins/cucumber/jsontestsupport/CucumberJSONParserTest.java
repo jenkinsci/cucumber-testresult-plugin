@@ -56,13 +56,13 @@ public class CucumberJSONParserTest {
 		CucumberTestResult testresult = parser.parse(files, mockListener);
 
 		assertThat("Tests passed", testresult.isPassed(), is(true));
-		assertThat("Correct # of passing tests", testresult.getPassCount(), is(8));
+		assertThat("Correct # of passing tests", testresult.getPassCount(), is(1));
 		assertThat("Correct # of failing tests", testresult.getFailCount(), is(0));
 		assertThat("Correct # of skipped tests", testresult.getSkipCount(), is(0));
-		assertThat("Duration is correct", testresult.getDuration(), is(0.13143785F));
-		assertThat("Duration string is correct", testresult.getDurationString(), is("0.13 sec"));
-		assertThat("Correct # of children", testresult.getChildren(), hasSize(3));
-		assertThat("Correct # of features", testresult.getFeatures(), hasSize(3));
+		assertThat("Duration is correct", testresult.getDuration(), is(0.0010894671F));
+		assertThat("Duration string is correct", testresult.getDurationString(), is("1 ms"));
+		assertThat("Correct # of children", testresult.getChildren(), hasSize(1));
+		assertThat("Correct # of features", testresult.getFeatures(), hasSize(1));
 
 		// Get the individual Features and check their scenarios.
 	}
@@ -165,6 +165,7 @@ public class CucumberJSONParserTest {
 		                                   .getEmbeddedItems(), hasSize(1));
 	}
 
+	
 	private static File getResourceAsFile(String resource) throws Exception {
 		URL url = CucumberJSONParserTest.class.getResource(resource);
 		Assert.assertNotNull("Resource " + resource + " could not be found", url);

@@ -29,8 +29,8 @@ import hudson.FilePath;
 import hudson.FilePath.FileCallable;
 import hudson.Launcher;
 import hudson.Util;
+import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
 import hudson.remoting.VirtualChannel;
 import hudson.tasks.test.TestResultParser;
 import jenkins.MasterToSlaveFileCallable;
@@ -85,8 +85,9 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
 
 	@Override
-	public TestResult parse(final String testResultLocations,
-	                        final AbstractBuild build,
+	public TestResult parseResult(final String testResultLocations,
+	                        final Run<?, ?> build,
+                            final FilePath workspace,
 	                        final Launcher launcher,
 	                        final TaskListener listener) throws InterruptedException, IOException {
 		boolean ignoreTimestampCheck = IGNORE_TIMESTAMP_CHECK; // so that the property can be set on the master
@@ -97,7 +98,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 		      new ParseResultCallable(this, testResultLocations, ignoreTimestampCheck, buildTime, nowMaster,
 		                              listener);
 
-		return build.getWorkspace().act(callable);
+		return workspace.act(callable);
 	}
 
 

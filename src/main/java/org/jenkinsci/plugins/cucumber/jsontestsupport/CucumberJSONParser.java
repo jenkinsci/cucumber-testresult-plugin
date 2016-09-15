@@ -26,9 +26,10 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 import gherkin.JSONParser;
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,12 +92,13 @@ public class CucumberJSONParser extends DefaultTestResultParserImpl {
 
 
 	@Override
-	public CucumberTestResult parse(final String testResultLocations,
-	                        final AbstractBuild build,
+	public CucumberTestResult parseResult(final String testResultLocations,
+	                        final Run<?, ?> build,
+                            final FilePath workspace,
 	                        final Launcher launcher,
 	                        final TaskListener listener) throws InterruptedException, IOException {
 		// overridden so we tally and set the owner on the master.
-		CucumberTestResult result = (CucumberTestResult) super.parse(testResultLocations, build, launcher, listener);
+		CucumberTestResult result = (CucumberTestResult) super.parseResult(testResultLocations, build, workspace, launcher, listener);
 		result.tally();
 		result.setOwner(build);
 		return result;

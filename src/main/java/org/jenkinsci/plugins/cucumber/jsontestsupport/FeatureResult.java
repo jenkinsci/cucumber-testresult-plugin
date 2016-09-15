@@ -24,7 +24,7 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import gherkin.formatter.model.Feature;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -52,7 +52,7 @@ public class FeatureResult extends MetaTabulatedResult {
 
 	private Feature feature;
 	private String uri;
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 	private transient String safeName;
 	
 	private List<ScenarioResult> scenarioResults = new ArrayList<ScenarioResult>();
@@ -113,11 +113,11 @@ public class FeatureResult extends MetaTabulatedResult {
 
 
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
-	public void setOwner(AbstractBuild<?, ?> owner) {
+	public void setOwner(Run<?, ?> owner) {
 	   this.owner = owner;
 	   for (ScenarioResult sr : scenarioResults) {
 	   	sr.setOwner(owner);

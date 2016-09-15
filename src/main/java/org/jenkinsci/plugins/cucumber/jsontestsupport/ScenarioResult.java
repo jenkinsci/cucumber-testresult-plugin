@@ -23,7 +23,7 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.junit.CaseResult.Status;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -72,7 +72,7 @@ public class ScenarioResult extends TestResult {
 
 	private FeatureResult parent;
 	
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 	private transient String safeName;
 
 	// true if this test failed
@@ -147,12 +147,12 @@ public class ScenarioResult extends TestResult {
 
 	
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
 
-	public void setOwner(AbstractBuild<?, ?> owner) {
+	public void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 		for (BeforeAfterResult bar : beforeResults) {
 			bar.setOwner(owner);

@@ -29,7 +29,7 @@ import java.util.Collection;
 import gherkin.formatter.model.Background;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -45,7 +45,7 @@ public class BeforeAfterResult extends TestResult {
 	private Match macth;
 	private Result result;
 
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 
 
 	public BeforeAfterResult(Match match, Result result) {
@@ -96,12 +96,12 @@ public class BeforeAfterResult extends TestResult {
 
 
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
 
-	void setOwner(AbstractBuild<?, ?> owner) {
+	void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 	}
 

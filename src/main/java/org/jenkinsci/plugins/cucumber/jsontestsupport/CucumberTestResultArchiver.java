@@ -34,6 +34,8 @@ import hudson.matrix.MatrixBuild;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.CheckPoint;
+import hudson.model.Job;
+import hudson.model.Project;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -160,7 +162,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		if (action == null) {
 			action = new CucumberTestResultAction(build, result, listener);
 			CHECKPOINT.block();
-			build.addAction(action);
+			//build.addAction(action);
 			CHECKPOINT.report();
 		}
 		else {
@@ -202,7 +204,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	public Collection<Action> getProjectActions(AbstractProject<?, ?> project) {
 		return Collections.<Action> singleton(new TestResultProjectAction(project));
 	}
-
+	
 
 	public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
 		return new TestResultAggregator(build, launcher, listener);
@@ -237,6 +239,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 
 	@Extension
+	//@Symbol("cucumber")
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public String getDisplayName() {

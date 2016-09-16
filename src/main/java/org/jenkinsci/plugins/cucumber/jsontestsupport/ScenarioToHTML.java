@@ -223,7 +223,7 @@ public class ScenarioToHTML {
 		sb.append(m.getLocation()).append(' ');
 		addFailure(sb, r);
 		// XXX add argument formatting
-		List<Argument> args = m.getArguments();
+		// List<Argument> args = m.getArguments();
 		endLine(sb);
 		return sb;
 	}

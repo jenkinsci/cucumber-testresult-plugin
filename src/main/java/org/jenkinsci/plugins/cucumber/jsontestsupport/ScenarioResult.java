@@ -34,6 +34,8 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -280,8 +282,8 @@ public class ScenarioResult extends TestResult {
 			ScenarioResult prev = (ScenarioResult) getPreviousResult();
 			if (prev != null && !prev.isPassed())
 				this.failedSince = prev.getFailedSince();
-			else if (getOwner() != null) {
-				this.failedSince = getOwner().getNumber();
+			else if (getRun() != null) {
+				this.failedSince = getRun().getNumber();
 			}
 			else {
 				LOGGER.warning("Can not calculate failed since. we have a previous result but no owner.");
@@ -298,8 +300,8 @@ public class ScenarioResult extends TestResult {
 	public int getAge() {
 		if (isPassed())
 			return 0;
-		else if (getOwner() != null) {
-			return getOwner().getNumber() - getFailedSince() + 1;
+		else if (getRun() != null) {
+			return getRun().getNumber() - getFailedSince() + 1;
 		}
 		else {
 			LOGGER.fine("Trying to get age of a ScenarioResult without an owner");
@@ -436,6 +438,7 @@ public class ScenarioResult extends TestResult {
 	}
 
 	@Override
+	@SuppressFBWarnings(value={"OBL_UNSATISFIED_OBLIGATION"}, justification="rsp.serveFile closes the stream")
 	public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
 		if (token.equals(getId())) {
 			return this;
@@ -449,7 +452,7 @@ public class ScenarioResult extends TestResult {
 				// is there enough here to display the thing??
 				for (EmbeddedItem item : getEmbeddedItems()) {
 					if (item.getFilename().equals(rest)) {
-						File file = new File(getOwner().getRootDir(), "cucumber/embed/" + getParent().getSafeName() +
+						File file = new File(getRun().getRootDir(), "cucumber/embed/" + getParent().getSafeName() +
 								"/" +
 								getSafeName() + "/" + item.getFilename());
 						try {
@@ -460,12 +463,12 @@ public class ScenarioResult extends TestResult {
 						} catch (IOException ex) {
 							String msg = String.format("Failed to serve cucumber embedded file (%s) for in Feature " +
 											"(%s) for job (%s)",
-									item.getFilename(), this.getFullName(), this.getOwner().getFullDisplayName());
+									item.getFilename(), this.getFullName(), this.getRun().getFullDisplayName());
 							LOGGER.log(Level.WARNING, msg, ex);
 						} catch (ServletException ex) {
 							String msg = String.format("Failed to serve cucumber embedded file (%s) for in Feature " +
 											"(%s) for job (%s)",
-									item.getFilename(), this.getFullName(), this.getOwner().getFullDisplayName());
+									item.getFilename(), this.getFullName(), this.getRun().getFullDisplayName());
 							LOGGER.log(Level.WARNING, msg, ex);
 						}
 						return null;

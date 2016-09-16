@@ -36,6 +36,8 @@ import hudson.tasks.test.TestResult;
  */
 public class StepResult extends TestResult {
 
+	private static final long serialVersionUID = 1L;
+
 	private Step step;
 	private Match match;
 	private Result result;

@@ -23,14 +23,9 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import gherkin.formatter.model.Background;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
 import hudson.model.Run;
-import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
@@ -41,6 +36,8 @@ import hudson.tasks.test.TestResult;
  * @author James Nord
  */
 public class BeforeAfterResult extends TestResult {
+
+	private static final long serialVersionUID = 1L;
 
 	private Match macth;
 	private Result result;

@@ -23,9 +23,6 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.util.logging.Logger;
-
-import hudson.Extension;
 import hudson.Plugin;
 
 

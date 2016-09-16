@@ -65,6 +65,9 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.kohsuke.stapler.DataBoundSetter;
 
 /**
@@ -103,6 +106,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	}
 
     @Override
+    @SuppressFBWarnings(value={"NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"}, justification="whatever")
     public boolean
     perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException,
             IOException {
@@ -115,7 +119,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		publishReport(run, filePath, launcher, taskListener);
 	}
 
-
+	@SuppressFBWarnings(value={"RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"}, justification="move to java.nio for file stuff")
 	public boolean
 	      publishReport(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException,
 	                                                                             IOException {
@@ -202,7 +206,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	@Override
 	public Collection<Action> getProjectActions(AbstractProject<?, ?> project) {
-		return Collections.<Action> singleton(new TestResultProjectAction(project));
+		return Collections.<Action> singleton(new TestResultProjectAction((Job)project));
 	}
 	
 

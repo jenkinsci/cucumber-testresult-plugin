@@ -49,6 +49,8 @@ import org.kohsuke.stapler.export.Exported;
 
 import com.thoughtworks.xstream.XStream;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * {@link Action} that displays the Cucumber test result.
  *
@@ -59,6 +61,7 @@ import com.thoughtworks.xstream.XStream;
  * @author James Nord
  * @author Kohsuke Kawaguchi (original junit support)
  */
+@SuppressFBWarnings(value={"UG_SYNC_SET_UNSYNC_GET"}, justification="the getter and setter are both synchronized")
 public class CucumberTestResultAction extends AbstractTestResultAction<CucumberTestResultAction> implements StaplerProxy, LastBuildAction {
 
    private static final Logger LOGGER = Logger.getLogger(CucumberTestResultAction.class.getName());
@@ -124,7 +127,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
            r = new CucumberTestResult(); // return a dummy
        }
        r.tally();
-       r.setOwner(this.owner);
+       r.setOwner(this.run);
        return r;
    }
    

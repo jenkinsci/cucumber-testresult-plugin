@@ -28,8 +28,6 @@ import java.util.Collection;
 
 import gherkin.formatter.model.Background;
 import hudson.model.Run;
-import hudson.tasks.test.TabulatedResult;
-import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
 /**
@@ -39,6 +37,8 @@ import hudson.tasks.test.TestResult;
  */
 public class BackgroundResult extends TestResult {
 	
+	private static final long serialVersionUID = 1L;
+
 	private Background background;
 	private ArrayList<StepResult> stepResults = new ArrayList<StepResult>(); 
 	

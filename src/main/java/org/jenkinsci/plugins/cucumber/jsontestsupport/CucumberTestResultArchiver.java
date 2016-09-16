@@ -258,7 +258,10 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		 */
 		public FormValidation doCheckTestResults(@AncestorInPath AbstractProject project,
 		                                         @QueryParameter String value) throws IOException {
-			return FilePath.validateFileMask(project.getSomeWorkspace(), value);
+			if (project != null) {
+				return FilePath.validateFileMask(project.getSomeWorkspace(), value);
+			}
+			return FormValidation.ok(); 
 		}
 
 

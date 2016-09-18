@@ -25,14 +25,6 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import java.net.URL;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.Node;
-import hudson.model.Result;
-import hudson.slaves.DumbSlave;
-
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -44,7 +36,20 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SingleFileSCM;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Job;
+import hudson.model.Node;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.slaves.DumbSlave;
+import jenkins.model.Jenkins;
+
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -110,7 +115,7 @@ public class CucumberJSONSupportPluginIT {
 		// check the scenario is 1 passing
 		wc = jenkinsRule.createWebClient();
 		HtmlPage htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
-		assertTrue(checkPageContains(htmlPage, "0 failures"));
+		assertThat(htmlPage.asText(), containsString("0 failures"));
 		// resume the build
 		SemaphoreStep.success("wait/1", true);
 
@@ -119,10 +124,11 @@ public class CucumberJSONSupportPluginIT {
 		Jenkins.getInstance().reload();
 		wc = jenkinsRule.createWebClient();
 		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
-		assertTrue(checkPageContains(htmlPage, "0 failures"));
+		assertThat(htmlPage.asText(), containsString("0 failures"));
 		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature_2");
-		assertTrue(checkPageContains(htmlPage, "1 failures"));
-		// check the build is unstable
+		assertThat(htmlPage.asText(), containsString("1 failures"));
+		
+// check the build is unstable
 		jenkinsRule.assertBuildStatus(Result.UNSTABLE, r1);
 	}
 
@@ -156,7 +162,7 @@ public class CucumberJSONSupportPluginIT {
 		// check the scenario is 1 failing
 		wc = jenkinsRule.createWebClient();
 		HtmlPage htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
-		assertTrue(checkPageContains(htmlPage, "1 failures"));
+		assertThat(htmlPage.asText(), containsString("1 failures"));
 		// resume the build
 		SemaphoreStep.success("wait/1", true);
 
@@ -166,13 +172,32 @@ public class CucumberJSONSupportPluginIT {
 		Jenkins.getInstance().reload();
 		wc = jenkinsRule.createWebClient();
 		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
-		assertTrue(checkPageContains(htmlPage, "1 failures"));
+		assertThat(htmlPage.asText(), containsString("1 failures"));
 		htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature_2");
-		assertTrue(checkPageContains(htmlPage, "0 failures"));
+		assertThat(htmlPage.asText(), containsString("0 failures"));
 		// check the build is failure
 		jenkinsRule.assertBuildStatus(Result.FAILURE, r1);
 	}
 
+	@Test
+	public void testSymbol() throws Exception {
+		WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "symbol");
+
+		job.setDefinition(new CpsFlowDefinition("node {\n" +
+										"  writeFile file: 'pass.json', text: '''" +
+										getResourceAsString("featurePass.json") +
+										"  '''\n" +
+										"  cucumber 'pass.json'\n" +
+										"}"));
+
+
+		Run r1 = jenkinsRule.buildAndAssertSuccess((Job)job);
+
+		// check the scenario is 1 passing
+		wc = jenkinsRule.createWebClient();
+		HtmlPage htmlPage = wc.getPage(r1, "cucumberTestReport/foo-feature");
+		assertThat(htmlPage.asText(), allOf(containsString("1 tests"), containsString("0 failures")));
+	}
 
 	
 	private static URL getResource(String resource) throws Exception {
@@ -186,7 +211,4 @@ public class CucumberJSONSupportPluginIT {
 		return org.apache.commons.io.IOUtils.toString(url);
 	}
 
-	private static boolean checkPageContains(HtmlPage htmlPage, String content) {
-		return htmlPage.asText().contains(content);
-	}
 }

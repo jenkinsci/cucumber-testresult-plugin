@@ -61,6 +61,7 @@ import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 
 import org.apache.tools.ant.types.FileSet;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -243,7 +244,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 
 	@Extension
-	//@Symbol("cucumber")
+	@Symbol("cucumber")
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public String getDisplayName() {

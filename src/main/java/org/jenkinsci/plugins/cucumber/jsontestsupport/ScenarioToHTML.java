@@ -302,7 +302,7 @@ public class ScenarioToHTML {
 				sb.append("<tr>");
 				for (String cell : dtr.getCells()) {
 					if (firstRow) {
-						sb.append("<th width=\"").append(colwidth).append("%\">");
+						sb.append("<th style=\"text-align:left\" width=\"").append(colwidth).append("%\">");
 						sb.append(cell);
 						sb.append("</th>");
 						continue;

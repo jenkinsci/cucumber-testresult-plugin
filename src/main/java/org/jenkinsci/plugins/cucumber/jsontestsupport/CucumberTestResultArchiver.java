@@ -24,6 +24,7 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -31,16 +32,7 @@ import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.CheckPoint;
-import hudson.model.Job;
-import hudson.model.Project;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.remoting.Callable;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -50,26 +42,17 @@ import hudson.tasks.test.TestResultAggregator;
 import hudson.tasks.test.TestResultProjectAction;
 import hudson.util.FormValidation;
 import jenkins.security.MasterToSlaveCallable;
+import jenkins.tasks.SimpleBuildStep;
+import net.sf.json.JSONObject;
+import org.apache.tools.ant.types.FileSet;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
-
-import jenkins.tasks.SimpleBuildStep;
-import net.sf.json.JSONObject;
-
-import org.apache.tools.ant.types.FileSet;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Generates HTML report from Cucumber JSON files.
@@ -87,14 +70,17 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	private boolean ignoreBadSteps;
 
+	private boolean ignoreDiffTracking;
+
 	@DataBoundConstructor
 	public CucumberTestResultArchiver(String testResults) {
 		this.testResults = testResults;
 	}
 
-	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps){
+	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps, boolean ignoreDiffTracking){
 		this(testResults);
 		setIgnoreBadSteps(ignoreBadSteps);
+		setIgnoreDiffTracking(ignoreDiffTracking);
 	}
 
 	@DataBoundSetter
@@ -104,6 +90,15 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	public boolean getIgnoreBadSteps(){
 		return ignoreBadSteps;
+	}
+
+	@DataBoundSetter
+	public void setIgnoreDiffTracking(boolean ignoreDiffTracking){
+		this.ignoreDiffTracking = ignoreDiffTracking;
+	}
+
+	public boolean getIgnoreDiffTracking(){
+		return ignoreDiffTracking;
 	}
 
     @Override
@@ -161,23 +156,25 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 				}
 			}
 		}
-		
+
+
 		action = build.getAction(CucumberTestResultAction.class);
-		
 		if (action == null) {
 			action = new CucumberTestResultAction(build, result, listener);
-			CHECKPOINT.block();
-			//build.addAction(action);
-			CHECKPOINT.report();
-		}
-		else {
-			CHECKPOINT.block();
+			if (!ignoreDiffTracking) {
+				CHECKPOINT.block();
+				CHECKPOINT.report();
+			}
+		} else {
+			if (!ignoreDiffTracking) {
+				CHECKPOINT.block();
+			}
 			action.mergeResult(result, listener);
 			build.save();
-			CHECKPOINT.report();
+			if (!ignoreDiffTracking) {
+				CHECKPOINT.report();
+			}
 		}
-		// action.setHealthScaleFactor(getHealthScaleFactor()); // overwrites previous value if appending
-		
 
 		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
 			throw new AbortException("No cucumber scenarios appear to have been run.");
@@ -248,7 +245,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
 		public String getDisplayName() {
-			return "Publish Cucumber test result report";
+			return "Publish Cucumber test result report - custom";
 		}
 
 		@Override
@@ -256,8 +253,10 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		      newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
 			String testResults = formData.getString("testResults");
 			boolean ignoreBadSteps = formData.getBoolean("ignoreBadSteps");
+			boolean ignoreDiffTracking = formData.getBoolean("ignoreDiffTracking");
 			LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
-			return new CucumberTestResultArchiver(testResults, ignoreBadSteps);
+			LOGGER.fine("ignoreDiffTracking ="+ ignoreDiffTracking);
+			return new CucumberTestResultArchiver(testResults, ignoreBadSteps, ignoreDiffTracking);
 		}
 
 

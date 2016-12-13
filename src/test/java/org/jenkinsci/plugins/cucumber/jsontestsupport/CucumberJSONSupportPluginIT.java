@@ -23,8 +23,10 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.net.URL;
-
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import hudson.model.*;
+import hudson.slaves.DumbSlave;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -36,20 +38,11 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SingleFileSCM;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.Job;
-import hudson.model.Node;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.slaves.DumbSlave;
-import jenkins.model.Jenkins;
+import java.net.URL;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.core.AllOf.allOf;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 

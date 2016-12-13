@@ -32,6 +32,9 @@ THE SOFTWARE.
     <f:entry title="${%Ignore Bad Steps}">
         <f:checkbox field="ignoreBadSteps"/>
     </f:entry>
+    <f:entry title="${%Ignore Diff Tracking - custom patch to avoid locking}">
+        <f:checkbox field="ignoreDiffTracking"/>
+    </f:entry>
 <!--
   see hudson\tasks\junit\JUnitResultArchiver on how to add extended features if we want to support it.
 -->

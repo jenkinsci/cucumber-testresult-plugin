@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import gherkin.formatter.Argument;
 import gherkin.formatter.model.Background;
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.DataTableRow;

@@ -24,6 +24,7 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.AbortException;
 import hudson.Extension;
@@ -46,6 +47,8 @@ import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.tools.ant.types.FileSet;
 import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.cucumber.jsontestsupport.rerun.CucumberRerun1TestResultAction;
+import org.jenkinsci.plugins.cucumber.jsontestsupport.rerun.CucumberRerun2TestResultAction;
 import org.kohsuke.stapler.*;
 
 import java.io.File;
@@ -185,7 +188,64 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			build.setResult(Result.UNSTABLE);
 		}
 
+		String rerun1Path = filterFileThatContains(workspace,_testResults,"rerun1");
+		if(!Strings.isNullOrEmpty(rerun1Path)) {
+			CucumberTestResult rerun1Result = parser.parseResult(rerun1Path, build, workspace, launcher, listener);
+			rerun1Result.setNameAppendix("Rerun 1");
+			CucumberRerun1TestResultAction rerun1Action = build.getAction(CucumberRerun1TestResultAction.class);
+			if (rerun1Action == null) {
+				rerun1Action = new CucumberRerun1TestResultAction(build, rerun1Result, listener);
+				if (!ignoreDiffTracking) {
+					CHECKPOINT.block();
+					CHECKPOINT.report();
+				}
+			} else {
+				if (!ignoreDiffTracking) {
+					CHECKPOINT.block();
+				}
+				rerun1Action.mergeResult(rerun1Result, listener);
+				build.save();
+				if (!ignoreDiffTracking) {
+					CHECKPOINT.report();
+				}
+			}
+		}
+
+		String rerun2Path = filterFileThatContains(workspace,_testResults,"rerun2");
+		if(!Strings.isNullOrEmpty(rerun2Path)) {
+			CucumberTestResult rerun2Result = parser.parseResult(rerun2Path, build, workspace, launcher, listener);
+			rerun2Result.setNameAppendix("Rerun 2");
+			CucumberRerun2TestResultAction rerun2Action = build.getAction(CucumberRerun2TestResultAction.class);
+			if (rerun2Action == null) {
+				rerun2Action = new CucumberRerun2TestResultAction(build, rerun2Result, listener);
+				if (!ignoreDiffTracking) {
+					CHECKPOINT.block();
+					CHECKPOINT.report();
+				}
+			} else {
+				if (!ignoreDiffTracking) {
+					CHECKPOINT.block();
+				}
+				rerun2Action.mergeResult(rerun2Result, listener);
+				build.save();
+				if (!ignoreDiffTracking) {
+					CHECKPOINT.report();
+				}
+			}
+		}
 		return true;
+	}
+
+	private String filterFileThatContains(FilePath workspace, String _testResults, String filePathPart) throws IOException, InterruptedException {
+		FilePath[] paths = workspace.list(_testResults);
+		for(FilePath filePath : paths){
+			String remote = filePath.getRemote();
+			int index = remote.indexOf(filePathPart);
+			if(index > 0){
+				return "**/"+ remote.substring(index);
+			}
+		}
+		return "";
 	}
 
 

@@ -79,10 +79,10 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	private transient int skipCount;
 	private transient float duration;
 
+	private String nameAppendix = "";
 
 	public CucumberTestResult() {
 	}
-
 
 	/**
 	 * Add a FeatureResult to this TestResult
@@ -222,7 +222,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	// @Override - this is an interface method
 	public String getDisplayName() {
-		return "Cucumber Test Results";
+		return "Cucumber Test Results " + (nameAppendix == null ? "" : nameAppendix);
 	}
 	
 
@@ -328,6 +328,14 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	@Override
 	public String getDescription() {
-		return "Cucumber Test Results";
+		return "Cucumber Test Results " + (nameAppendix == null ? "" : nameAppendix);
+	}
+
+	public String getNameAppendix() {
+		return nameAppendix;
+	}
+
+	public void setNameAppendix(String nameAppendix) {
+		this.nameAppendix = nameAppendix;
 	}
 }

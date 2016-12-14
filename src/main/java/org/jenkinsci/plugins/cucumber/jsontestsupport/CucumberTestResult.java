@@ -84,6 +84,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	public CucumberTestResult() {
 	}
 
+
 	/**
 	 * Add a FeatureResult to this TestResult
 	 * 

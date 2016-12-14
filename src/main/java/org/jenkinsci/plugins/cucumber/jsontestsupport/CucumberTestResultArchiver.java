@@ -47,14 +47,14 @@ import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.tools.ant.types.FileSet;
 import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.cucumber.jsontestsupport.rerun.CucumberRerun1TestResultAction;
-import org.jenkinsci.plugins.cucumber.jsontestsupport.rerun.CucumberRerun2TestResultAction;
 import org.kohsuke.stapler.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -160,84 +160,81 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			}
 		}
 
-
-		action = build.getAction(CucumberTestResultAction.class);
-		if (action == null) {
-			action = new CucumberTestResultAction(build, result, listener);
-			if (!ignoreDiffTracking) {
-				CHECKPOINT.block();
-				CHECKPOINT.report();
-			}
-		} else {
-			if (!ignoreDiffTracking) {
-				CHECKPOINT.block();
-			}
-			action.mergeResult(result, listener);
-			build.save();
-			if (!ignoreDiffTracking) {
-				CHECKPOINT.report();
-			}
+		try {
+			action = reportResultForAction(CucumberTestResultAction.class, build, listener, result);
+		} catch (Exception e) {
+			LOGGER.log(Level.FINE, "Unable to handle results", e);
+			return false;
 		}
 
-		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
+		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0) {
 			throw new AbortException("No cucumber scenarios appear to have been run.");
+		}
 
-		if (action.getResult().getTotalCount() == action.getResult().getFailCount()){
+		if (action.getResult().getTotalCount() == action.getResult().getFailCount()) {
 			build.setResult(Result.FAILURE);
 		} else if (action.getResult().getFailCount() > 0) {
 			build.setResult(Result.UNSTABLE);
 		}
 
-		String rerun1Path = filterFileThatContains(workspace,_testResults,"rerun1");
-		if(!Strings.isNullOrEmpty(rerun1Path)) {
-			CucumberTestResult rerun1Result = parser.parseResult(rerun1Path, build, workspace, launcher, listener);
-			rerun1Result.setNameAppendix("Rerun 1");
-			CucumberRerun1TestResultAction rerun1Action = build.getAction(CucumberRerun1TestResultAction.class);
-			if (rerun1Action == null) {
-				rerun1Action = new CucumberRerun1TestResultAction(build, rerun1Result, listener);
-				if (!ignoreDiffTracking) {
-					CHECKPOINT.block();
-					CHECKPOINT.report();
-				}
-			} else {
-				if (!ignoreDiffTracking) {
-					CHECKPOINT.block();
-				}
-				rerun1Action.mergeResult(rerun1Result, listener);
-				build.save();
-				if (!ignoreDiffTracking) {
-					CHECKPOINT.report();
-				}
-			}
-		}
-
-		String rerun2Path = filterFileThatContains(workspace,_testResults,"rerun2");
-		if(!Strings.isNullOrEmpty(rerun2Path)) {
-			CucumberTestResult rerun2Result = parser.parseResult(rerun2Path, build, workspace, launcher, listener);
-			rerun2Result.setNameAppendix("Rerun 2");
-			CucumberRerun2TestResultAction rerun2Action = build.getAction(CucumberRerun2TestResultAction.class);
-			if (rerun2Action == null) {
-				rerun2Action = new CucumberRerun2TestResultAction(build, rerun2Result, listener);
-				if (!ignoreDiffTracking) {
-					CHECKPOINT.block();
-					CHECKPOINT.report();
-				}
-			} else {
-				if (!ignoreDiffTracking) {
-					CHECKPOINT.block();
-				}
-				rerun2Action.mergeResult(rerun2Result, listener);
-				build.save();
-				if (!ignoreDiffTracking) {
-					CHECKPOINT.report();
-				}
-			}
-		}
+		parseRerunResults(build, workspace, launcher, listener, _testResults, parser);
 		return true;
 	}
 
-	private String filterFileThatContains(FilePath workspace, String _testResults, String filePathPart) throws IOException, InterruptedException {
-		FilePath[] paths = workspace.list(_testResults);
+	private void parseRerunResults(Run<?, ?> build, FilePath workspace, Launcher launcher,
+																 TaskListener listener, String testResultsPath,
+																 CucumberJSONParser parser) throws IOException, InterruptedException {
+
+		parseRerunWithNumberIfExists(1, build, workspace, launcher, listener, testResultsPath, parser);
+		parseRerunWithNumberIfExists(2, build, workspace, launcher, listener, testResultsPath, parser);
+	}
+
+	private void parseRerunWithNumberIfExists(int number, Run<?, ?> build, FilePath workspace, Launcher launcher,
+																						TaskListener listener, String testResultsPath,
+																						CucumberJSONParser parser) throws IOException, InterruptedException {
+		String rerunFilePath = filterFileThatContains(workspace, testResultsPath, "rerun" + number);
+		if (!Strings.isNullOrEmpty(rerunFilePath)) {
+			CucumberTestResult rerunResult = parser.parseResult(rerunFilePath, build, workspace, launcher, listener);
+			rerunResult.setNameAppendix("Rerun " + number);
+			try {
+				Class rerunActionClass = Class.forName(getRerunActionClassName(number));
+				reportResultForAction(rerunActionClass, build, listener, rerunResult);
+			} catch (Exception e) {
+				LOGGER.log(Level.FINE, "Unable to process rerun with number " + number, e);
+			}
+		}
+	}
+
+	private String getRerunActionClassName(int number) {
+		return getClass().getPackage().getName() +
+        ".rerun.CucumberRerun" + number + "TestResultAction";
+	}
+
+	private CucumberTestResultAction reportResultForAction(Class actionClass, Run<?, ?> build, TaskListener listener,
+																												 CucumberTestResult result) throws Exception {
+		CucumberTestResultAction action = (CucumberTestResultAction) build.getAction(actionClass);
+		if (action == null) {
+      Constructor actionClassConstructor = actionClass.getConstructor(Run.class, CucumberTestResult.class, TaskListener.class);
+      action = (CucumberTestResultAction) actionClassConstructor.newInstance(build, result, listener);
+      if (!ignoreDiffTracking) {
+        CHECKPOINT.block();
+        CHECKPOINT.report();
+      }
+    } else {
+      if (!ignoreDiffTracking) {
+        CHECKPOINT.block();
+      }
+      action.mergeResult(result, listener);
+      build.save();
+      if (!ignoreDiffTracking) {
+        CHECKPOINT.report();
+      }
+    }
+    return action;
+	}
+
+	private String filterFileThatContains(FilePath workspace, String testResultsPath, String filePathPart) throws IOException, InterruptedException {
+		FilePath[] paths = workspace.list(testResultsPath);
 		for(FilePath filePath : paths){
 			String remote = filePath.getRemote();
 			int index = remote.indexOf(filePathPart);

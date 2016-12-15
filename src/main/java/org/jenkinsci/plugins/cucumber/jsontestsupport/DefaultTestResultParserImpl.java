@@ -64,6 +64,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
 	public static final boolean IGNORE_TIMESTAMP_CHECK = Boolean.getBoolean(TestResultParser.class.getName()
 	                                                                        + ".ignoreTimestampCheck");
+	public static final String RERUN_CUCUMBER_JSON_REGEX = ".*rerun\\d+.cucumber.json";
 
 
 	/**
@@ -162,11 +163,11 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 		}
 
 		private boolean shouldSkipFile(boolean isRerunAction, FilePath path) {
-			return !isRerunAction && path.getRemote().contains("rerun");
+			return !isRerunAction && path.getRemote().matches(RERUN_CUCUMBER_JSON_REGEX);
 		}
 
 		private boolean isRerunAction() {
-			return testResultLocations.contains("rerun");
+			return testResultLocations.matches(RERUN_CUCUMBER_JSON_REGEX);
 		}
 	}
 }

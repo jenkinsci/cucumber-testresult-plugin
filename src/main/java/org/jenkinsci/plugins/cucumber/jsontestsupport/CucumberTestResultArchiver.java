@@ -56,6 +56,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generates HTML report from Cucumber JSON files.
@@ -192,7 +194,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	private void parseRerunWithNumberIfExists(int number, Run<?, ?> build, FilePath workspace, Launcher launcher,
 																						TaskListener listener, String testResultsPath,
 																						CucumberJSONParser parser) throws IOException, InterruptedException {
-		String rerunFilePath = filterFileThatContains(workspace, testResultsPath, "rerun" + number);
+		String rerunFilePath = filterRerunFilePath(workspace, testResultsPath, number);
 		if (!Strings.isNullOrEmpty(rerunFilePath)) {
 			CucumberTestResult rerunResult = parser.parseResult(rerunFilePath, build, workspace, launcher, listener);
 			rerunResult.setNameAppendix("Rerun " + number);
@@ -233,13 +235,14 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
     return action;
 	}
 
-	private String filterFileThatContains(FilePath workspace, String testResultsPath, String filePathPart) throws IOException, InterruptedException {
+	private String filterRerunFilePath(FilePath workspace, String testResultsPath, int number) throws IOException, InterruptedException {
 		FilePath[] paths = workspace.list(testResultsPath);
-		for(FilePath filePath : paths){
+		for (FilePath filePath : paths) {
 			String remote = filePath.getRemote();
-			int index = remote.indexOf(filePathPart);
-			if(index > 0){
-				return "**/"+ remote.substring(index);
+			Pattern p = Pattern.compile("rerun" + number + ".cucumber.json");
+			Matcher m = p.matcher(remote);
+			if (m.find()) {
+				return "**/" + remote.substring(m.start());
 			}
 		}
 		return "";

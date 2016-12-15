@@ -223,7 +223,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	// @Override - this is an interface method
 	public String getDisplayName() {
-		return "Cucumber Test Results " + (nameAppendix == null ? "" : nameAppendix);
+		return "Cucumber Test Results " + nameAppendix;
 	}
 	
 
@@ -329,7 +329,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	@Override
 	public String getDescription() {
-		return "Cucumber Test Results " + (nameAppendix == null ? "" : nameAppendix);
+		return "Cucumber Test Results " + nameAppendix;
 	}
 
 	public String getNameAppendix() {

@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
 
 /**
  * Generates HTML report from Cucumber JSON files.
- * 
+ *
  * @author James Nord
  * @author Kohsuke Kawaguchi (original JUnit code)
  */
@@ -183,39 +183,41 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		return true;
 	}
 
-	private void parseRerunResults(Run<?, ?> build, FilePath workspace, Launcher launcher,
-																 TaskListener listener, String testResultsPath,
-																 CucumberJSONParser parser) throws IOException, InterruptedException {
+  private void parseRerunResults(Run<?, ?> build, FilePath workspace, Launcher launcher,
+                                 TaskListener listener, String testResultsPath,
+                                 CucumberJSONParser parser) throws IOException, InterruptedException {
 
-		parseRerunWithNumberIfExists(1, build, workspace, launcher, listener, testResultsPath, parser);
-		parseRerunWithNumberIfExists(2, build, workspace, launcher, listener, testResultsPath, parser);
-	}
+    parseRerunWithNumberIfExists(1, build, workspace, launcher, listener, testResultsPath, parser);
+    parseRerunWithNumberIfExists(2, build, workspace, launcher, listener, testResultsPath, parser);
+  }
 
-	private void parseRerunWithNumberIfExists(int number, Run<?, ?> build, FilePath workspace, Launcher launcher,
-																						TaskListener listener, String testResultsPath,
-																						CucumberJSONParser parser) throws IOException, InterruptedException {
-		String rerunFilePath = filterRerunFilePath(workspace, testResultsPath, number);
-		if (!Strings.isNullOrEmpty(rerunFilePath)) {
-			CucumberTestResult rerunResult = parser.parseResult(rerunFilePath, build, workspace, launcher, listener);
-			rerunResult.setNameAppendix("Rerun " + number);
-			try {
-				Class rerunActionClass = Class.forName(getRerunActionClassName(number));
-				reportResultForAction(rerunActionClass, build, listener, rerunResult);
-			} catch (Exception e) {
-				LOGGER.log(Level.FINE, "Unable to process rerun with number " + number, e);
-			}
-		}
-	}
+  private void parseRerunWithNumberIfExists(int number, Run<?, ?> build, FilePath workspace,
+                                            Launcher launcher, TaskListener listener,
+                                            String testResultsPath,
+                                            CucumberJSONParser parser) throws IOException, InterruptedException {
+    String rerunFilePath = filterRerunFilePath(workspace, testResultsPath, number);
+    if (!Strings.isNullOrEmpty(rerunFilePath)) {
+      CucumberTestResult rerunResult = parser.parseResult(rerunFilePath, build, workspace, launcher, listener);
+      rerunResult.setNameAppendix("Rerun " + number);
+      try {
+        Class rerunActionClass = Class.forName(getRerunActionClassName(number));
+        reportResultForAction(rerunActionClass, build, listener, rerunResult);
+      } catch (Exception e) {
+        LOGGER.log(Level.FINE, "Unable to process rerun with number " + number, e);
+      }
+    }
+  }
 
-	private String getRerunActionClassName(int number) {
-		return getClass().getPackage().getName() +
+  private String getRerunActionClassName(int number) {
+    return getClass().getPackage().getName() +
         ".rerun.CucumberRerun" + number + "TestResultAction";
-	}
+  }
 
-	private CucumberTestResultAction reportResultForAction(Class actionClass, Run<?, ?> build, TaskListener listener,
-																												 CucumberTestResult result) throws Exception {
-		CucumberTestResultAction action = (CucumberTestResultAction) build.getAction(actionClass);
-		if (action == null) {
+  private CucumberTestResultAction reportResultForAction(Class actionClass, Run<?, ?> build,
+                                                         TaskListener listener,
+                                                         CucumberTestResult result) throws Exception {
+    CucumberTestResultAction action = (CucumberTestResultAction) build.getAction(actionClass);
+    if (action == null) {
       Constructor actionClassConstructor = actionClass.getConstructor(Run.class, CucumberTestResult.class, TaskListener.class);
       action = (CucumberTestResultAction) actionClassConstructor.newInstance(build, result, listener);
       if (!ignoreDiffTracking) {
@@ -235,18 +237,18 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
     return action;
 	}
 
-	private String filterRerunFilePath(FilePath workspace, String testResultsPath, int number) throws IOException, InterruptedException {
-		FilePath[] paths = workspace.list(testResultsPath);
-		for (FilePath filePath : paths) {
-			String remote = filePath.getRemote();
-			Pattern p = Pattern.compile("rerun" + number + ".cucumber.json");
-			Matcher m = p.matcher(remote);
-			if (m.find()) {
-				return "**/" + remote.substring(m.start());
-			}
-		}
-		return "";
-	}
+  private String filterRerunFilePath(FilePath workspace, String testResultsPath, int number) throws IOException, InterruptedException {
+    FilePath[] paths = workspace.list(testResultsPath);
+    for (FilePath filePath : paths) {
+      String remote = filePath.getRemote();
+      Pattern p = Pattern.compile("rerun" + number + ".cucumber.json");
+      Matcher m = p.matcher(remote);
+      if (m.find()) {
+        return "**/" + remote.substring(m.start());
+      }
+    }
+    return "";
+  }
 
 
 	/**
@@ -266,7 +268,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 	public Collection<Action> getProjectActions(AbstractProject<?, ?> project) {
 		return Collections.<Action> singleton(new TestResultProjectAction((Job)project));
 	}
-	
+
 
 	public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
 		return new TestResultAggregator(build, launcher, listener);
@@ -286,7 +288,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 
 	/**
-	 * {@link Callable} that gets the temporary directory from the node. 
+	 * {@link Callable} that gets the temporary directory from the node.
 	 */
 	private final static class TmpDirCallable extends MasterToSlaveCallable<String, InterruptedException> {
 
@@ -328,7 +330,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 			if (project != null) {
 				return FilePath.validateFileMask(project.getSomeWorkspace(), value);
 			}
-			return FormValidation.ok(); 
+			return FormValidation.ok();
 		}
 
 

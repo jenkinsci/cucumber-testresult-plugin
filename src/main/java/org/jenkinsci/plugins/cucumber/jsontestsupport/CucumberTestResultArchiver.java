@@ -133,7 +133,31 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		CucumberJSONParser parser = new CucumberJSONParser(ignoreBadSteps);
 
 		CucumberTestResult result = parser.parseResult(_testResults, build, workspace, launcher, listener);
+		copyEmbeddedItems(build, launcher, result);
 
+
+		try {
+			action = reportResultForAction(CucumberTestResultAction.class, build, listener, result);
+		} catch (Exception e) {
+			LOGGER.log(Level.FINE, "Unable to handle results", e);
+			return false;
+		}
+
+		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0) {
+			throw new AbortException("No cucumber scenarios appear to have been run.");
+		}
+
+		if (action.getResult().getTotalCount() == action.getResult().getFailCount()) {
+			build.setResult(Result.FAILURE);
+		} else if (action.getResult().getFailCount() > 0) {
+			build.setResult(Result.UNSTABLE);
+		}
+
+		parseRerunResults(build, workspace, launcher, listener, _testResults, parser);
+		return true;
+	}
+
+	private void copyEmbeddedItems(Run<?, ?> build, Launcher launcher, CucumberTestResult result) throws IOException, InterruptedException {
 		// TODO - look at all of the Scenarios and see if there are any embedded items contained with in them
 		String remoteTempDir = launcher.getChannel().call(new TmpDirCallable());
 
@@ -161,29 +185,9 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 				}
 			}
 		}
-
-		try {
-			action = reportResultForAction(CucumberTestResultAction.class, build, listener, result);
-		} catch (Exception e) {
-			LOGGER.log(Level.FINE, "Unable to handle results", e);
-			return false;
-		}
-
-		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0) {
-			throw new AbortException("No cucumber scenarios appear to have been run.");
-		}
-
-		if (action.getResult().getTotalCount() == action.getResult().getFailCount()) {
-			build.setResult(Result.FAILURE);
-		} else if (action.getResult().getFailCount() > 0) {
-			build.setResult(Result.UNSTABLE);
-		}
-
-		parseRerunResults(build, workspace, launcher, listener, _testResults, parser);
-		return true;
 	}
 
-  private void parseRerunResults(Run<?, ?> build, FilePath workspace, Launcher launcher,
+	private void parseRerunResults(Run<?, ?> build, FilePath workspace, Launcher launcher,
                                  TaskListener listener, String testResultsPath,
                                  CucumberJSONParser parser) throws IOException, InterruptedException {
 
@@ -199,6 +203,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
     if (!Strings.isNullOrEmpty(rerunFilePath)) {
       CucumberTestResult rerunResult = parser.parseResult(rerunFilePath, build, workspace, launcher, listener);
       rerunResult.setNameAppendix("Rerun " + number);
+			copyEmbeddedItems(build, launcher, rerunResult);
       try {
         Class rerunActionClass = Class.forName(getRerunActionClassName(number));
         reportResultForAction(rerunActionClass, build, listener, rerunResult);

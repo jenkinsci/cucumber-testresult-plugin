@@ -66,7 +66,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 
    private static final Logger LOGGER = Logger.getLogger(CucumberTestResultAction.class.getName());
 
-   private static final XStream XSTREAM = new XStream2();
+   protected static final XStream XSTREAM = new XStream2();
 
    private transient WeakReference<CucumberTestResult> result;
    
@@ -111,7 +111,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
        this.result = new WeakReference<CucumberTestResult>(result);
    }
 	
-   private XmlFile getDataFile() {
+   protected XmlFile getDataFile() {
       return new XmlFile(XSTREAM,new File(run.getRootDir(), "cucumberResult.xml"));
   }
 
@@ -202,7 +202,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 	 *           the result to merge with the current results.
 	 * @param listener
 	 */
-	synchronized void mergeResult(CucumberTestResult other, TaskListener listener) {
+	protected synchronized void mergeResult(CucumberTestResult other, TaskListener listener) {
 		CucumberTestResult cr = getResult();
 		for (FeatureResult fr : other.getFeatures()) {
 			// We need to add =the new results to the existing ones to keep the names stable

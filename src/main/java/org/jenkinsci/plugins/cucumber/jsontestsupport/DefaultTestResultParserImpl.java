@@ -64,6 +64,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
 	public static final boolean IGNORE_TIMESTAMP_CHECK = Boolean.getBoolean(TestResultParser.class.getName()
 	                                                                        + ".ignoreTimestampCheck");
+	public static final String RERUN_CUCUMBER_JSON_REGEX = ".*rerun\\d+.cucumber.json";
 
 
 	/**
@@ -140,6 +141,7 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 			// since dir is local, paths all point to the local files
 			List<File> files = new ArrayList<File>(paths.length);
 			for (FilePath path : paths) {
+				if(shouldSkipFile(isRerunAction(), path)) continue;
 				File report = new File(path.getRemote());
 				if (ignoreTimestampCheck || localBuildTime - 3000 /* error margin */< report.lastModified()) {
 					// this file is created during this build
@@ -158,6 +160,14 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 			}
 
 			return parserImpl.parse(files, listener);
+		}
+
+		private boolean shouldSkipFile(boolean isRerunAction, FilePath path) {
+			return !isRerunAction && path.getRemote().matches(RERUN_CUCUMBER_JSON_REGEX);
+		}
+
+		private boolean isRerunAction() {
+			return testResultLocations.matches(RERUN_CUCUMBER_JSON_REGEX);
 		}
 	}
 }

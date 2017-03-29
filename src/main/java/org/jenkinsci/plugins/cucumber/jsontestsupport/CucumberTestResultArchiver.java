@@ -87,14 +87,19 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 
 	private boolean ignoreBadSteps;
 
-	@DataBoundConstructor
+  	private String setResult;
+
+
+
+  	@DataBoundConstructor
 	public CucumberTestResultArchiver(String testResults) {
 		this.testResults = testResults;
 	}
 
-	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps){
-		this(testResults);
-		setIgnoreBadSteps(ignoreBadSteps);
+	public CucumberTestResultArchiver(String testResults, boolean ignoreBadSteps, String setResult){
+	  this(testResults);
+	  setIgnoreBadSteps(ignoreBadSteps);
+	  setSetResult(setResult);
 	}
 
 	@DataBoundSetter
@@ -102,8 +107,16 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		this.ignoreBadSteps = ignoreBadSteps;
 	}
 
-	public boolean getIgnoreBadSteps(){
-		return ignoreBadSteps;
+  	@DataBoundSetter
+  	public void setSetResult(String setResult) { this.setResult = setResult; }
+
+
+  	public boolean getIgnoreBadSteps(){
+	    return ignoreBadSteps;
+	}
+
+  	public String getSetResult(){
+	    return setResult;
 	}
 
     @Override
@@ -182,10 +195,15 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		if (result.getPassCount() == 0 && result.getFailCount() == 0 && result.getSkipCount() == 0)
 			throw new AbortException("No cucumber scenarios appear to have been run.");
 
-		if (action.getResult().getTotalCount() == action.getResult().getFailCount()){
+		if (setResult.equals("failIfAll") && action.getResult().getTotalCount() == action.getResult().getFailCount()){
 			build.setResult(Result.FAILURE);
 		} else if (action.getResult().getFailCount() > 0) {
-			build.setResult(Result.UNSTABLE);
+		    if (setResult.equals("failIfAny")){
+		      build.setResult(Result.FAILURE);
+		    }
+		    else {
+		      build.setResult(Result.UNSTABLE);
+		    }
 		}
 
 		return true;
@@ -256,8 +274,10 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		      newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
 			String testResults = formData.getString("testResults");
 			boolean ignoreBadSteps = formData.getBoolean("ignoreBadSteps");
-			LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
-			return new CucumberTestResultArchiver(testResults, ignoreBadSteps);
+		  	String setResult = formData.getString("setResult");
+		  	LOGGER.fine("ignoreBadSteps = "+ ignoreBadSteps);
+		  	LOGGER.fine("setResult = "+ setResult);
+		  	return new CucumberTestResultArchiver(testResults, ignoreBadSteps, setResult);
 		}
 
 

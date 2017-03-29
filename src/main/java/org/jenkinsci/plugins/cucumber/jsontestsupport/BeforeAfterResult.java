@@ -23,14 +23,9 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import gherkin.formatter.model.Background;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.tasks.test.TabulatedResult;
+import hudson.model.Run;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
@@ -42,10 +37,12 @@ import hudson.tasks.test.TestResult;
  */
 public class BeforeAfterResult extends TestResult {
 
+	private static final long serialVersionUID = 1L;
+
 	private Match macth;
 	private Result result;
 
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 
 
 	public BeforeAfterResult(Match match, Result result) {
@@ -96,12 +93,12 @@ public class BeforeAfterResult extends TestResult {
 
 
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
 
-	void setOwner(AbstractBuild<?, ?> owner) {
+	void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 	}
 

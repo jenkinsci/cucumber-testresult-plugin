@@ -24,22 +24,22 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import hudson.AbortException;
-import hudson.FilePath;
-import hudson.FilePath.FileCallable;
-import hudson.Launcher;
-import hudson.Util;
-import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
-import hudson.remoting.VirtualChannel;
-import hudson.tasks.test.TestResultParser;
-import hudson.tasks.test.TestResult;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import hudson.AbortException;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.Util;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.remoting.VirtualChannel;
+import hudson.tasks.test.TestResult;
+import hudson.tasks.test.TestResultParser;
+import jenkins.MasterToSlaveFileCallable;
 
 // XXX This is a shameless rip of of hudson.tasks.test.DefaultTestResultParserImpl
 // however that implementation is brain dead and can not be used in a master/slave envoronment
@@ -84,8 +84,9 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 
 
 	@Override
-	public TestResult parse(final String testResultLocations,
-	                        final AbstractBuild build,
+	public TestResult parseResult(final String testResultLocations,
+	                        final Run<?, ?> build,
+                            final FilePath workspace,
 	                        final Launcher launcher,
 	                        final TaskListener listener) throws InterruptedException, IOException {
 		boolean ignoreTimestampCheck = IGNORE_TIMESTAMP_CHECK; // so that the property can be set on the master
@@ -96,13 +97,13 @@ public abstract class DefaultTestResultParserImpl extends TestResultParser imple
 		      new ParseResultCallable(this, testResultLocations, ignoreTimestampCheck, buildTime, nowMaster,
 		                              listener);
 
-		return build.getWorkspace().act(callable);
+		return workspace.act(callable);
 	}
 
 
 
 
-	static final class ParseResultCallable implements FileCallable<TestResult> {
+	static final class ParseResultCallable extends MasterToSlaveFileCallable<TestResult> {
 
 		private static final long serialVersionUID = -5438084460911132640L;
 		private DefaultTestResultParserImpl parserImpl;

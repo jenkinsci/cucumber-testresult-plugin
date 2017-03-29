@@ -31,6 +31,8 @@ package org.jenkinsci.plugins.cucumber.jsontestsupport;
  */
 public class CucumberModelException extends RuntimeException {
 
+	private static final long serialVersionUID = 1L;
+
 	public CucumberModelException(String message) {
 		super(message);
 	}

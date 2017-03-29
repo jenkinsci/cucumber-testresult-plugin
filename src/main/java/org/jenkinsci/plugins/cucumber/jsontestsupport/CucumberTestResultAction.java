@@ -23,18 +23,24 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
+import hudson.Util;
 import hudson.XmlFile;
 import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.AbstractBuild;
+import hudson.model.Job;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestResultProjectAction;
 import hudson.util.HeapSpaceStringConverter;
 import hudson.util.XStream2;
+import jenkins.tasks.SimpleBuildStep.LastBuildAction;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,6 +48,8 @@ import org.kohsuke.stapler.StaplerProxy;
 import org.kohsuke.stapler.export.Exported;
 
 import com.thoughtworks.xstream.XStream;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * {@link Action} that displays the Cucumber test result.
@@ -53,7 +61,8 @@ import com.thoughtworks.xstream.XStream;
  * @author James Nord
  * @author Kohsuke Kawaguchi (original junit support)
  */
-public class CucumberTestResultAction extends AbstractTestResultAction<CucumberTestResultAction> implements StaplerProxy {
+@SuppressFBWarnings(value={"UG_SYNC_SET_UNSYNC_GET"}, justification="the getter and setter are both synchronized")
+public class CucumberTestResultAction extends AbstractTestResultAction<CucumberTestResultAction> implements StaplerProxy, LastBuildAction {
 
    private static final Logger LOGGER = Logger.getLogger(CucumberTestResultAction.class.getName());
 
@@ -76,17 +85,18 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
 
 
 	
-	public CucumberTestResultAction(AbstractBuild owner, CucumberTestResult result, BuildListener listener) {
-		super(owner);
+	public CucumberTestResultAction(Run<?, ?> owner, CucumberTestResult result, TaskListener listener) {
+		super();
+		owner.addAction(this);
 		setResult(result, listener);
 	}
 	
    /**
     * Overwrites the {@link CucumberTestResult} by a new data set.
     */
-   public synchronized void setResult(CucumberTestResult result, BuildListener listener) {
+   public synchronized void setResult(CucumberTestResult result, TaskListener listener) {
        
-   	 totalCount = result.getTotalCount();
+       totalCount = result.getTotalCount();
        failCount = result.getFailCount();
        skipCount = result.getSkipCount();
 
@@ -102,7 +112,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
    }
 	
    private XmlFile getDataFile() {
-      return new XmlFile(XSTREAM,new File(owner.getRootDir(), "cucumberResult.xml"));
+      return new XmlFile(XSTREAM,new File(run.getRootDir(), "cucumberResult.xml"));
   }
 
    /**
@@ -117,7 +127,7 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
            r = new CucumberTestResult(); // return a dummy
        }
        r.tally();
-       r.setOwner(this.owner);
+       r.setOwner(this.run);
        return r;
    }
    
@@ -185,4 +195,35 @@ public class CucumberTestResultAction extends AbstractTestResultAction<CucumberT
     public  String getUrlName() {
        return "cucumberTestReport";
    }
+
+	/**
+	 * Merge results from other into an existing set of results.
+	 * @param other
+	 *           the result to merge with the current results.
+	 * @param listener
+	 */
+	synchronized void mergeResult(CucumberTestResult other, TaskListener listener) {
+		CucumberTestResult cr = getResult();
+		for (FeatureResult fr : other.getFeatures()) {
+			// We need to add =the new results to the existing ones to keep the names stable
+			// otherwise any embedded items will be attached to the wrong result
+			// XXX this has the potential to cause a concurrentModificationException or other bad issues if someone is getting all the features...
+			cr.addFeatureResult(fr);
+		}
+		//cr.tally();
+		// XXX Do we need to add TagResults or call tally()?
+		// persist the new result to disk
+		this.setResult(cr, listener);
+	}
+
+	@Override
+	public Collection<? extends Action> getProjectActions() {
+		// TODO use our own action to not conflict with junit
+		Job<?,?> job = run.getParent();
+		if (/* getAction(Class) produces a StackOverflowError */!Util.filter(job.getActions(), TestResultProjectAction.class).isEmpty()) {
+			// JENKINS-26077: someone like XUnitPublisher already added one
+			return Collections.emptySet();
+		}
+		return Collections.singleton(new TestResultProjectAction(job));
+	}
 }

@@ -24,7 +24,7 @@
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
 import gherkin.formatter.model.Tag;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
@@ -71,7 +71,7 @@ public class CucumberTestResult extends MetaTabulatedResult {
 	 */
 	private transient Map<String, TagResult> tagMap =  new HashMap<String, TagResult>();
 
-	private transient AbstractBuild<?, ?> owner;
+	private transient Run<?, ?> owner;
 	
 	/* Recomputed by a call to {@link CucumberTestResult#tally()} */
 	private transient int passCount;
@@ -132,11 +132,11 @@ public class CucumberTestResult extends MetaTabulatedResult {
 
 	
 	@Override
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getRun() {
 		return owner;
 	}
 
-	void setOwner(AbstractBuild<?, ?> owner) {
+	void setOwner(Run<?, ?> owner) {
 		this.owner = owner;
 		for (FeatureResult fr : featureResults) {
 			fr.setOwner(owner);

@@ -35,7 +35,6 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.CheckPoint;
 import hudson.model.Job;
-import hudson.model.Project;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -135,7 +134,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 		CucumberTestResult result = parser.parseResult(_testResults, build, workspace, launcher, listener);
 
 		// TODO - look at all of the Scenarios and see if there are any embedded items contained with in them
-		String remoteTempDir = launcher.getChannel().call(new TmpDirCallable());
+		String remoteTempDir = workspace.act(new TmpDirCallable());
 
 		// if so we need to copy them to the master.
 		for (FeatureResult f : result.getFeatures()) {
@@ -144,7 +143,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 					// this is the wrong place to do the copying...
 					// XXX Need to do something with MasterToSlaveCallable to makesure we are safe from evil
 					// injection
-					FilePath srcFilePath = new FilePath(launcher.getChannel(), remoteTempDir + '/' + item.getFilename());
+					FilePath srcFilePath = new FilePath(workspace, remoteTempDir + '/' + item.getFilename());
 					// XXX when we support the workflow we will need to make sure that these files do not clash....
 					File destRoot = new File(build.getRootDir(), "/cucumber/embed/" + f.getSafeName() + '/' + s
 							.getSafeName() + '/');

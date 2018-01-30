@@ -1,3 +1,4 @@
+gherkin.formatter.Argument
 gherkin.formatter.Mappable
 gherkin.formatter.model.Background
 gherkin.formatter.model.BasicStatement

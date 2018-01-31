@@ -35,7 +35,7 @@
 
 	<groupId>org.jenkins-ci.plugins</groupId>
 	<artifactId>cucumber-testresult-plugin</artifactId>
-	<version>0.10.1-SNAPSHOT</version>
+	<version>0.10.1</version>
 	<packaging>hpi</packaging>
 
 	<name>Cucumber json test reporting.</name>
@@ -60,7 +60,7 @@
 		<connection>scm:git:ssh://git@github.com/jenkinsci/cucumber-testresult-plugin.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/cucumber-testresult-plugin.git</developerConnection>
 		<url>https://github.com/jenkinsci/cucumber-testresult-plugin/</url>
-		<tag>HEAD</tag>
+		<tag>cucumber-testresult-plugin-0.10.1</tag>
 	</scm>
 
 	<licenses>

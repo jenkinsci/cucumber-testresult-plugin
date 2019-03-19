@@ -35,6 +35,7 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -121,7 +122,7 @@ public class ScenarioResult extends TestResult {
 	@Override
 	public synchronized String getSafeName() {
 		if (safeName != null) {
-			return safeName;
+			return HtmlUtils.htmlEscape(safeName);
 		}
 		String name = safe(scenario.getId());
 		String parentName = parent.getSafeName() + ';';
@@ -130,7 +131,7 @@ public class ScenarioResult extends TestResult {
 			name = name.replace(parentName, "");
 		}
 		safeName = uniquifyName(parent.getChildren(), name);
-		return safeName;
+		return HtmlUtils.htmlEscape(safeName);
 	}
 	
 	@Override

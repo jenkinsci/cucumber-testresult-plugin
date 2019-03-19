@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * A TagResult is a pseudo result to link scenarios with the same tag.
@@ -149,10 +150,10 @@ public class TagResult extends MetaTabulatedResult {
 	public synchronized String getSafeName() {
 		// no need to make unique as tags are shared!
 		if (safeName != null) {
-			return safeName;
+			return HtmlUtils.htmlEscape(safeName);
 		}
 		safeName = safe(getName());
-		return safeName;
+		return HtmlUtils.htmlEscape(safeName);
 	}
 
 

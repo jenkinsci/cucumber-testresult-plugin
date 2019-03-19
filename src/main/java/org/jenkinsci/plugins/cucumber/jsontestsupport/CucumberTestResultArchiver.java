@@ -145,8 +145,7 @@ public class CucumberTestResultArchiver extends Recorder implements MatrixAggreg
 					// injection
 					FilePath srcFilePath = new FilePath(workspace, remoteTempDir + '/' + item.getFilename());
 					// XXX when we support the workflow we will need to make sure that these files do not clash....
-					File destRoot = new File(build.getRootDir(), "/cucumber/embed/" + f.getSafeName() + '/' + s
-							.getSafeName() + '/');
+					File destRoot = new File(build.getRootDir(), "/cucumber/embed/");
 					destRoot.mkdirs();
 					File destFile = new File(destRoot, item.getFilename());
 					if (!destFile.getAbsolutePath().startsWith(destRoot.getAbsolutePath())) {

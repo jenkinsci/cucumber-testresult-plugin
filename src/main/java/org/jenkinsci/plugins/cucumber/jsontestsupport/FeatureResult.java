@@ -39,6 +39,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Represents a single Feature in Cucumber.
@@ -163,10 +164,10 @@ public class FeatureResult extends MetaTabulatedResult {
 	@Override
 	public synchronized String getSafeName() {
 		if (safeName != null) {
-			return safeName;
+			return HtmlUtils.htmlEscape(safeName);
 		}
 		safeName = uniquifyName(parent.getChildren(), safe(feature.getId()));
-		return safeName;
+		return HtmlUtils.htmlEscape(safeName);
 	}
 
 	@Override

@@ -457,7 +457,7 @@ public class ScenarioResult extends TestResult {
 								getSafeName() + "/" + item.getFilename());
 						try {
 							FileInputStream fileInputStream = new FileInputStream(file);
-							rsp.serveFile(req, fileInputStream, file.lastModified(), Long.MAX_VALUE, file.length(),
+							rsp.serveFile(req, fileInputStream, 0, Long.MAX_VALUE, file.length(),
 									"mime-type:" + item.getMimetype());
 							return null;
 						} catch (IOException ex) {

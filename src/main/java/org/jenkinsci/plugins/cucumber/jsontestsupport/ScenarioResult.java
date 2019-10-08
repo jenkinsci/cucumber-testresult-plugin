@@ -452,9 +452,7 @@ public class ScenarioResult extends TestResult {
 				// is there enough here to display the thing??
 				for (EmbeddedItem item : getEmbeddedItems()) {
 					if (item.getFilename().equals(rest)) {
-						File file = new File(getRun().getRootDir(), "cucumber/embed/" + getParent().getSafeName() +
-								"/" +
-								getSafeName() + "/" + item.getFilename());
+						File file = new File(getRun().getRootDir(), "cucumber/embed/" + item.getFilename());
 						try {
 							FileInputStream fileInputStream = new FileInputStream(file);
 							rsp.serveFile(req, fileInputStream, file.lastModified(), Long.MAX_VALUE, file.length(),

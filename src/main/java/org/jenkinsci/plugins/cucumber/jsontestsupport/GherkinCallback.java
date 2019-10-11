@@ -39,6 +39,7 @@ import hudson.model.TaskListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,6 +64,8 @@ class GherkinCallback implements Formatter, Reporter {
 	private String currentURI = null;
 
 	private CucumberTestResult testResult;
+
+	private List<BeforeAfterResult> backgroundBeforeAfterResults = null;
 
 
 	GherkinCallback(CucumberTestResult testResult) {
@@ -113,6 +116,7 @@ class GherkinCallback implements Formatter, Reporter {
 			throw new CucumberModelException("Background: {" + background.getName() + "} received before previous background: {" + currentBackground.getName()+ "} handled");
 		}
 		currentBackground = new BackgroundResult(background);
+		backgroundBeforeAfterResults = new ArrayList<BeforeAfterResult>();
 	}
 
 
@@ -130,6 +134,12 @@ class GherkinCallback implements Formatter, Reporter {
 		currentScenarioResult = new ScenarioResult(scenario, currentBackground);
 		currentBackground = null;
 		currentFeatureResult.addScenarioResult(currentScenarioResult);
+
+		if (backgroundBeforeAfterResults != null) {
+			for (BeforeAfterResult beforeAfterResult : backgroundBeforeAfterResults) {
+				currentScenarioResult.addBeforeResult(beforeAfterResult);
+			}
+		}
 	}
 
 
@@ -218,7 +228,12 @@ class GherkinCallback implements Formatter, Reporter {
 			LOG.log(Level.FINE, "rep        result : " + result.getErrorMessage());
 			LOG.log(Level.FINE, "rep        result : " + result.getError());
 		}
-		currentScenarioResult.addBeforeResult(new BeforeAfterResult(match, result));
+
+		if (currentScenarioResult != null) {
+			currentScenarioResult.addBeforeResult(new BeforeAfterResult(match, result));
+		} else {
+			backgroundBeforeAfterResults.add(new BeforeAfterResult(match, result));
+		}
 	}
 
 

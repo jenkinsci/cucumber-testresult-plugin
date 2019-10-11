@@ -17,6 +17,17 @@
         "name": "A Calculator",
         "keyword": "Background",
         "line": 4,
+        "before":[
+          {
+            "match":{
+              "location":"SomeLocation"
+            },
+            "result":{
+              "status":"passed",
+              "duration":0
+            }
+          }
+        ],
         "steps": [
           {
             "result": {
